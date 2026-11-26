@@ -1,123 +1,101 @@
-# PvP TopPlates
+<p align="center"><img src="images/icon.png" width="128" alt="Jarvis PvP icon"></p>
 
-PvP TopPlates is a Dalamud plugin that redraws player HP, shield, MP, and Guard
-state in ImGui's foreground layer. The bars are projected from each player
-character's world position, stabilized in screen space, and rendered as
-top-level UI with no world depth test. Terrain, walls, ramps, and other 3D
-geometry therefore cannot draw over them.
+<h1 align="center">Jarvis PvP</h1>
 
-This is a Dalamud plugin, not a Penumbra or TexTools asset mod.
+<p align="center"><b>Clear plates for every player in FFXIV PvP: HP, MP, Limit Break, Guard, debuffs, signs and who has you as their target.</b><br>
+A Dalamud plugin, based on <a href="https://github.com/Petra105/PvPTopPlates">PvP TopPlates</a> by Petra105.</p>
 
-## Install
+<p align="center">
+<img src="https://img.shields.io/badge/Dalamud%20API-15-blue" alt="Dalamud API 15">
+<img src="https://img.shields.io/badge/version-1.5.0-gold" alt="Version 1.5.0">
+<img src="https://img.shields.io/badge/licence-MIT-green" alt="MIT licence">
+<a href="https://boosty.to/aloyb"><img src="https://img.shields.io/badge/support-Boosty-f15f2c" alt="Support on Boosty"></a>
+</p>
 
-1. Open Dalamud Settings with `/xlsettings`.
-2. Open the `Experimental` tab.
-3. Add this URL under Custom Plugin Repositories:
+---
 
-   ```text
-   https://raw.githubusercontent.com/Petra105/PvPTopPlates/main/repo.json
+## What it does
+
+Every player in PvP gets a plate that terrain and walls cannot hide, drawn from the character's position in the world:
+
+- **HP bar** with the barrier drawn in its own colour, **MP bar** and the **Limit Break gauge** of every player
+  (read from the Crystalline Conflict team lists; blinks when full).
+- **Job icon** (party list style, gold glyph or light tile) that fills up while the player drinks a
+  Standard-issue Elixir.
+- **Guard**: the hotbar icon with a ready / active / recast border, a glow while active and the recast countdown,
+  for allies and enemies.
+- **Debuffs** on enemies, allies and yourself, each with its own position (under, over, right of Guard, left of the
+  job icon), with time left and an optional border around your own debuffs.
+- **Signs** (attack 1-8, bind, ignore, shapes) moved above the whole plate.
+- **Enemies targeting you**: a role-colour dot under them, their job icons above your head, a red glow and crossed
+  swords on their job icon.
+- **Name and HP text** in several formats, plate above the head or under the feet, follows jumps and dashes exactly.
+
+### The settings window (`/jpvp`)
+
+- Pages: Preview, General, Bars, Text, Icons, Debuffs & signs, Targeting me, Appearance, Diagnostics, About.
+- A **live preview** of you, your target and an ally, animated. On each settings page it shows only what that page
+  sets.
+- **Test in world**: a sample enemy plate above your own character, to set everything up without a match.
+- Themes: Midnight blue, Black, Light and Crystal (classic blue Final Fantasy menu).
+- Interface in English, French, German and Japanese, with the official game terms of each language.
+
+## Plays by the rules
+
+- It only **shows what the game already knows** (HP, statuses, targets, the team lists). It never acts for you,
+  never presses buttons and never automates anything.
+- **No network requests.** The log and reports stay on your PC until you paste them somewhere yourself.
+- The game's own UI is never changed, except that a sign over a player can be hidden while Jarvis PvP draws it above
+  the plate (option).
+
+## Installing
+
+1. In game, open `/xlsettings` → **Experimental**.
+2. Under **Custom Plugin Repositories**, add this URL, tick **Enabled** and press **Save**:
+
+   ```
+   https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/repo.json
    ```
 
-4. Save, then open `/xlplugins` and install **PvP TopPlates**.
+3. Open `/xlplugins`, search for **Jarvis PvP**, install it and type `/jpvp`.
 
-## Behavior
+Updates arrive through the plugin installer like for any other plugin.
 
-- Runs only in PvP by default.
-- Draws only targetable, living player characters with valid HP data.
-- Respects currently active native nameplates for non-enemies by default.
-- Scans every character-manager slot for player characters instead of relying
-  on the convenience player enumerable, which can omit PvP actors.
-- Treats non-party and non-alliance player characters as enemies while PvP is
-  active, even when Crystalline Conflict does not set the usual hostile flag.
-- Uses the game's targetable state for enemy visibility because the native
-  nameplate snapshot is not reliable for enemy players in Crystalline
-  Conflict.
-- Separately filters enemies, party members, alliance members, the local
-  player, and other friendly players.
-- Always draws the local player's plate last so no other PvP TopPlates overlay
-  can cover it, including the current target.
-- Smooths small frame-to-frame projection changes with a configurable dead
-  zone, frame-rate-independent response, and large-movement snap threshold.
-- Shows an optional shield symbol for Guard: outlined/checkmarked when ready,
-  solid while active, and slashed while on an observed cooldown.
-- Observes enemy Guard actions directly so their cooldown state is retained
-  even if the short active-status window is missed between rendered frames.
-- Recognizes both Guard status variants currently exposed by the game.
-- Supports configurable range, HP and MP bar size, world height, screen
-  offset, colors, shield overlay, Guard-symbol size and spacing, names, HP
-  percentages, and target highlighting.
-- Hides with the game UI by default.
-- Never modifies game packets, HP values, targeting, or the native renderer.
+> If you use the original PvP TopPlates, turn it off: both draw plates for the same players.
 
-The native bars are not removed. Configure the world height and screen offset
-so the foreground bar covers or sits immediately beside the native bar.
+## Commands
 
-## Command
+| Command | What it does |
+|---|---|
+| `/jpvp` | Opens or closes the settings |
+| `/jpvp on` / `off` / `toggle` | Turns the plates on, off or switches them |
 
-`/ptop` opens the configuration window.
+## Something not working?
 
-`/ptop on`, `/ptop off`, and `/ptop toggle` change the master enable state.
+1. Open `/jpvp` → **Diagnostics**. For problems with Guard, Elixir or targeting, turn on **Record game events**
+   first and make the problem happen again.
+2. Press **Report a problem**: the report (version, settings, log) is copied and a new GitHub issue opens. Describe
+   what happened and paste the report with Ctrl+V.
 
-## Build
+Recorded events contain character names, so look over the report before sending it.
 
-Requirements:
+## Support
 
-- Windows 10 or later
-- Visual Studio 2022 or the .NET 10 SDK
-- XIVLauncher and Dalamud installed and launched at least once
+Jarvis PvP is free. If you like it, you can support me on [Boosty](https://boosty.to/aloyb).
 
-From the repository root:
+## Credits
 
-```powershell
-dotnet restore --locked-mode
-dotnet build PvPTopPlates.sln -c Release --no-restore
-```
+- Original plugin: [PvP TopPlates](https://github.com/Petra105/PvPTopPlates) by Petra105 (MIT licence).
+- Made with the help of the AI Claude (Anthropic): ideas and the creation of features.
+- Thanks to the Dalamud and FFXIVClientStructs teams.
 
-The development DLL is written beneath:
+## Building from source
 
-```text
-PvPTopPlates\bin\x64\Release\PvPTopPlates.dll
-```
+.NET 10 SDK: `dotnet build PvPTopPlates.sln -c Release`. The plugin is in `PvPTopPlates/bin/x64/Release/`
+(`JarvisPvP.dll`); add it under `/xlsettings` → Experimental → Dev Plugin Locations to load it as a dev plugin.
 
-The Dalamud SDK also creates a release package beneath the Release output
-directory. If Dalamud is installed in a non-default location, set
-`DALAMUD_HOME` to the appropriate Dalamud development directory before
-building.
+## Licence
 
-## Load as a development plugin
+MIT, see [LICENSE](LICENSE). Copyright (c) 2026 Petra105, copyright (c) 2026 Kwuwa for the Jarvis PvP changes.
 
-1. In game, run `/xlsettings`.
-2. Open `Experimental`.
-3. Add the full path to `PvPTopPlates.dll` under Dev Plugin Locations.
-4. Run `/xlplugins`, open `Dev Tools`, and enable PvP TopPlates.
-5. Run `/ptop` to adjust placement before entering a match. Enable the
-   outside-PvP positioning option temporarily if needed.
-
-## Visibility notes
-
-The `Require an active native nameplate` option is enabled by default. It
-limits non-enemy overlays to actors for which the game is currently
-maintaining a nameplate. Enemy overlays do not use this gate because
-Crystalline Conflict does not reliably report enemy nameplates through the
-Dalamud nameplate snapshot.
-
-Enemy actors must remain targetable. This remains the authoritative visibility
-gate and prevents the overlay from exposing players while the game marks them
-hidden, untargetable, or unavailable.
-
-Guard's active state is read from either Guard status variant exposed for the
-loaded actor. PvP TopPlates also observes client-received Guard action effects
-for both allies and enemies, allowing the 30-second cooldown state to begin
-even when the short active-status window is missed. A Guard use that occurs
-outside the client's loaded combat range cannot be reconstructed, so the
-symbol returns to the ready state when no observed cooldown remains. Revival
-resets the tracked state because PvP action recast timers reset on revival.
-
-## Compatibility
-
-The project targets Dalamud API 15 through `Dalamud.NET.Sdk/15.0.0`, current
-on July 26, 2026. Major FFXIV or Dalamud API updates may require a rebuild or
-small source update.
-
-Dalamud and other third-party FFXIV tools are not endorsed by Square Enix and
-may violate the FFXIV User Agreement. Use at your own risk.
+FINAL FANTASY XIV © SQUARE ENIX. Jarvis PvP is not affiliated with or endorsed by Square Enix.

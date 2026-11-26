@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Numerics;
+using System.Threading;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
@@ -16,6 +17,10 @@ internal sealed class GuardActionTracker : IDisposable
     private readonly ConcurrentDictionary<uint, GuardUseObservation> observations = new();
     private readonly IPluginLog log;
     private Hook<ReceiveActionEffectDelegate>? receiveActionEffectHook;
+    private int usesSeen;
+
+    /// <summary>Guard action effects seen since the plugin loaded (Diagnostics).</summary>
+    public int UsesSeen => Volatile.Read(ref usesSeen);
 
     private unsafe delegate void ReceiveActionEffectDelegate(
         uint casterEntityId,
@@ -97,6 +102,7 @@ internal sealed class GuardActionTracker : IDisposable
                 casterEntityId != 0 &&
                 casterEntityId != InvalidEntityId)
             {
+                Interlocked.Increment(ref usesSeen);
                 var observation = new GuardUseObservation(
                     header->GlobalSequence,
                     Environment.TickCount64);

@@ -1,0 +1,19 @@
+{
+  "Author": "Kwuwa (based on PvP TopPlates by Petra105)",
+  "Name": "Jarvis PvP",
+  "Punchline": "Clear PvP plates: HP, MP, Limit Break, Guard, debuffs, signs and who targets you.",
+  "Description": "Draws clear plates for players in PvP above the 3D world: HP with barrier, MP and Limit Break bars, job icon, Guard with its recast, debuffs, sign markers and the enemies that have you as their target. Settings window with a live preview, four themes, diagnostics and English / French / German / Japanese texts.\n\nUse /jpvp to open the settings. Based on PvP TopPlates by Petra105 (MIT licence).",
+  "RepoUrl": "https://github.com/Kwuwa/JarvisPvP",
+  "IconUrl": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/images/icon.png",
+  "ApplicableVersion": "any",
+  "Changelog": "1.5.0: first public release as Jarvis PvP. Settings window with sidebar pages, a live preview of you, your target and an ally, four themes, Test in world, Diagnostics with Copy report and Report a problem. Debuffs on enemies, allies and yourself, each with its own position. Plates stay above the game's UI and only hide behind plugin windows.",
+  "Tags": [
+    "pvp",
+    "ui",
+    "nameplates",
+    "health bars",
+    "mana bars",
+    "guard",
+    "limit break"
+  ]
+}

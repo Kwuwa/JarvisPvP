@@ -10,7 +10,7 @@ namespace PvPTopPlates;
 
 public sealed class Plugin : IDalamudPlugin
 {
-    private const string CommandName = "/ptop";
+    private const string CommandName = "/jpvp";
 
     [PluginService]
     internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
@@ -39,6 +39,12 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService]
     internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
 
+    [PluginService]
+    internal static IDataManager DataManager { get; private set; } = null!;
+
+    [PluginService]
+    internal static ITextureProvider TextureProvider { get; private set; } = null!;
+
     private readonly WindowSystem windowSystem = new("PvPTopPlates");
     private readonly ConfigWindow configWindow;
     private readonly NativeNameplateTracker nameplateTracker;
@@ -52,14 +58,20 @@ public sealed class Plugin : IDalamudPlugin
         Configuration =
             PluginInterface.GetPluginConfig() as Configuration ??
             new Configuration();
+        var migrated = Configuration.Migrate();
+        migrated |= Configuration.Migrate2();
+        migrated |= Configuration.Migrate3();
+        migrated |= Configuration.Migrate4();
+        if (migrated)
+            Configuration.Save();
 
-        configWindow = new ConfigWindow(Configuration);
         nameplateTracker = new NativeNameplateTracker();
         guardActionTracker = new GuardActionTracker(GameInteropProvider, Log);
         overlayRenderer = new OverlayRenderer(
             Configuration,
             nameplateTracker,
             guardActionTracker);
+        configWindow = new ConfigWindow(Configuration, overlayRenderer);
 
         windowSystem.AddWindow(configWindow);
 
@@ -68,15 +80,16 @@ public sealed class Plugin : IDalamudPlugin
             new CommandInfo(OnCommand)
             {
                 HelpMessage =
-                    "Open settings. Arguments: on, off, or toggle.",
+                    "Open the Jarvis PvP settings. Arguments: on, off or toggle.",
             });
 
         NamePlateGui.OnPostDataUpdate += OnNamePlateDataUpdate;
+        NamePlateGui.OnDataUpdate += OnNamePlateModify;
         PluginInterface.UiBuilder.Draw += Draw;
         PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
         PluginInterface.UiBuilder.OpenMainUi += OpenConfigUi;
 
-        Log.Information("PvP TopPlates loaded.");
+        UiLog.Info($"Jarvis PvP {typeof(Plugin).Assembly.GetName().Version} loaded.");
     }
 
     public void Dispose()
@@ -85,17 +98,23 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
         PluginInterface.UiBuilder.OpenMainUi -= OpenConfigUi;
         NamePlateGui.OnPostDataUpdate -= OnNamePlateDataUpdate;
+        NamePlateGui.OnDataUpdate -= OnNamePlateModify;
         CommandManager.RemoveHandler(CommandName);
 
         windowSystem.RemoveAllWindows();
         configWindow.Dispose();
+        overlayRenderer.Dispose();
         guardActionTracker.Dispose();
     }
 
     private void Draw()
     {
+        Loc.Selected = Configuration.UiLanguage;
         windowSystem.Draw();
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
         overlayRenderer.Draw();
+        var milliseconds = System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds;
+        overlayRenderer.FrameMs = (overlayRenderer.FrameMs * 0.95) + (milliseconds * 0.05);
     }
 
     private void OpenConfigUi()
@@ -119,10 +138,20 @@ public sealed class Plugin : IDalamudPlugin
                 Configuration.Enabled = !Configuration.Enabled;
                 Configuration.Save();
                 break;
+            case "lbscan":
+                LimitBreakScout.Run();
+                break;
             default:
                 configWindow.Toggle();
                 break;
         }
+    }
+
+    private void OnNamePlateModify(
+        INamePlateUpdateContext context,
+        IReadOnlyList<INamePlateUpdateHandler> handlers)
+    {
+        overlayRenderer.HideNativeSignMarkers(handlers);
     }
 
     private void OnNamePlateDataUpdate(
