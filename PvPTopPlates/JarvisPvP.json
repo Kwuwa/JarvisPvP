@@ -6,7 +6,7 @@
   "RepoUrl": "https://github.com/Kwuwa/JarvisPvP",
   "IconUrl": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/images/icon.png",
   "ApplicableVersion": "any",
-  "Changelog": "1.5.0: first public release as Jarvis PvP. Settings window with sidebar pages, a live preview of you, your target and an ally, four themes, Test in world, Diagnostics with Copy report and Report a problem. Debuffs on enemies, allies and yourself, each with its own position. Plates stay above the game's UI and only hide behind plugin windows.",
+  "Changelog": "1.0: first public release as Jarvis PvP. Settings window with sidebar pages, a live preview of you, your target and an ally, four themes, Test in world, Diagnostics with Copy report and Report a problem. Debuffs on enemies, allies and yourself, each with its own position. Plates stay above the game's UI and only hide behind plugin windows.",
   "Tags": [
     "pvp",
     "ui",

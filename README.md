@@ -7,7 +7,7 @@ A Dalamud plugin, based on <a href="https://github.com/Petra105/PvPTopPlates">Pv
 
 <p align="center">
 <img src="https://img.shields.io/badge/Dalamud%20API-15-blue" alt="Dalamud API 15">
-<img src="https://img.shields.io/badge/version-1.5.0-gold" alt="Version 1.5.0">
+<img src="https://img.shields.io/badge/version-1.0-gold" alt="Version 1.0">
 <img src="https://img.shields.io/badge/licence-MIT-green" alt="MIT licence">
 <a href="https://boosty.to/aloyb"><img src="https://img.shields.io/badge/support-Boosty-f15f2c" alt="Support on Boosty"></a>
 </p>

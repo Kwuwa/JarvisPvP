@@ -1263,7 +1263,7 @@ internal sealed class ConfigWindow : Window, IDisposable
     private static string VersionText()
     {
         var version = typeof(Plugin).Assembly.GetName().Version;
-        return version is null ? "?" : $"{version.Major}.{version.Minor}.{version.Build}";
+        return version is null ? "?" : version.Build > 0 ? $"{version.Major}.{version.Minor}.{version.Build}" : $"{version.Major}.{version.Minor}";
     }
 
     private void CommandRow(string command, string description, float s)
