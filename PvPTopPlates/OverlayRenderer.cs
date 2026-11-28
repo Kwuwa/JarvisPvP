@@ -1361,7 +1361,7 @@ internal sealed class OverlayRenderer : IDisposable
         var borderThickness = configuration.BorderThickness * uiScale;
         var rounding = configuration.CornerRounding * uiScale;
         var borderOffset = new Vector2(borderThickness);
-        plateOutline = OutlineColor(candidate.Relation);
+        (plateNameOutline, plateHpOutline) = Outlines(candidate.Relation);
         ResetDrawn();       // everything below reports its rectangle (Grow): plate extents for the preview and the UI cut
 
         var showHp = configuration.ShowHpBar;
@@ -1733,6 +1733,7 @@ internal sealed class OverlayRenderer : IDisposable
                 configuration.NameFontScale * textScale,
                 candidate.Name,
                 NameColor(candidate.Relation),
+                plateNameOutline,
                 textSize =>
                 {
                     var namePosition = new Vector2(
@@ -1934,7 +1935,7 @@ internal sealed class OverlayRenderer : IDisposable
             var nativeSize = Math.Max(1f, ImGui.GetFontSize());
             var textSize = ImGui.CalcTextSize(text) * (fontSize / nativeSize);
             var position = center - (textSize * 0.5f);
-            var outline = ToColor(plateOutline ?? new Vector4(0f, 0f, 0f, 0.95f));
+            var outline = ToColor(plateHpOutline?.Color ?? new Vector4(0f, 0f, 0f, 0.95f));
             var offset = Math.Max(1f, 1.2f * uiScale);
             foreach (var direction in OutlineOffsets)
                 drawList.AddText(font, fontSize, position + (direction * offset), outline, text);
@@ -2634,23 +2635,29 @@ internal sealed class OverlayRenderer : IDisposable
         Func<Vector2, Vector2> place,
         float uiScale)
     {
-        DrawCrispText(drawList, font, scale, text, configuration.TextColor, place, uiScale);
+        DrawCrispText(drawList, font, scale, text, configuration.TextColor, plateHpOutline, place, uiScale);
     }
 
-    /// <summary>Outline colour of the plate being drawn (names, HP text, timers); null = the usual drop shadow.</summary>
-    private Vector4? plateOutline;
+    private readonly record struct TextOutline(Vector4 Color, float Thickness);
 
-    private Vector4? OutlineColor(PlayerRelation relation)
+    /// <summary>Outlines of the plate being drawn: name, and HP text (debuff timers too); null = the drop shadow.</summary>
+    private TextOutline? plateNameOutline;
+    private TextOutline? plateHpOutline;
+
+    private (TextOutline? Name, TextOutline? Hp) Outlines(PlayerRelation relation)
     {
-        if (!configuration.TextOutline)
-            return null;
+        var c = configuration;
         return relation switch
         {
-            PlayerRelation.Enemy => configuration.EnemyOutlineColor,
-            PlayerRelation.Party => configuration.PartyOutlineColor,
-            PlayerRelation.Alliance => configuration.AllianceOutlineColor,
-            PlayerRelation.LocalPlayer => configuration.MyOutlineColor,
-            _ => configuration.FriendlyOutlineColor,
+            PlayerRelation.LocalPlayer => (
+                c.MyNameOutline ? new TextOutline(c.MyNameOutlineColor, c.MyNameOutlineThickness) : null,
+                c.MyHpOutline ? new TextOutline(c.MyHpOutlineColor, c.MyHpOutlineThickness) : null),
+            PlayerRelation.Enemy => (
+                c.EnemyNameOutline ? new TextOutline(c.EnemyNameOutlineColor, c.EnemyNameOutlineThickness) : null,
+                c.EnemyHpOutline ? new TextOutline(c.EnemyHpOutlineColor, c.EnemyHpOutlineThickness) : null),
+            _ => (
+                c.AllyNameOutline ? new TextOutline(c.AllyNameOutlineColor, c.AllyNameOutlineThickness) : null,
+                c.AllyHpOutline ? new TextOutline(c.AllyHpOutlineColor, c.AllyHpOutlineThickness) : null),
         };
     }
 
@@ -2669,6 +2676,7 @@ internal sealed class OverlayRenderer : IDisposable
         float scale,
         string text,
         Vector4 color,
+        TextOutline? textOutline,
         Func<Vector2, Vector2> place,
         float uiScale)
     {
@@ -2693,18 +2701,26 @@ internal sealed class OverlayRenderer : IDisposable
             var position = place(textSize);
             position = new Vector2(MathF.Round(position.X), MathF.Round(position.Y));
             var shadow = MathF.Max(1f, MathF.Round(size / BaseTextPixels)) * Math.Max(1f, uiScale);
-            if (plateOutline is { } outline)
+            if (textOutline is { } outline)
             {
-                // outline: the text repeated around itself (8 directions per pixel ring), drawn under the text
-                var thickness = Math.Max(1f, MathF.Round(configuration.TextOutlineThickness * Math.Max(1f, uiScale * size / BaseTextPixels)));
-                Grow(position - new Vector2(thickness), position + textSize + new Vector2(thickness));
-                if (outline.W > 0f)
+                // Outline: the text repeated on rings around itself, under the text. Every ring is sampled densely
+                // (about one copy per pixel of its circumference), so thick outlines on large text stay round and
+                // smooth instead of the 8-direction star that looked jagged.
+                var radius = Math.Max(0.5f, outline.Thickness * Math.Max(1f, uiScale * size / BaseTextPixels));
+                Grow(position - new Vector2(radius), position + textSize + new Vector2(radius));
+                if (outline.Color.W > 0f)
                 {
-                    var outlineColor = ToColor(outline);
-                    for (var ring = 1; ring <= (int)thickness; ring++)
+                    var outlineColor = ToColor(outline.Color);
+                    var rings = Math.Max(1, (int)MathF.Ceiling(radius));
+                    for (var ring = 1; ring <= rings; ring++)
                     {
-                        foreach (var direction in OutlineOffsets)
-                            drawList.AddText(imFont, size, position + (direction * ring), outlineColor, text);
+                        var r = radius * ring / rings;
+                        var steps = Math.Max(8, (int)MathF.Ceiling(MathF.Tau * r));
+                        for (var i = 0; i < steps; i++)
+                        {
+                            var angle = MathF.Tau * i / steps;
+                            drawList.AddText(imFont, size, position + new Vector2(MathF.Cos(angle) * r, MathF.Sin(angle) * r), outlineColor, text);
+                        }
                     }
                 }
             }

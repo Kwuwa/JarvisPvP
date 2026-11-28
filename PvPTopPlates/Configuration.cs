@@ -148,7 +148,30 @@ public sealed class Configuration : IPluginConfiguration
     /// <summary>Name font: 0 Axis, 1 Jupiter, 2 Trump Gothic (game fonts), 3 Noto Sans, 4 Inconsolata.</summary>
     public int NameFont { get; set; }
 
-    /// <summary>Outline around plate texts (names, HP, timers) instead of the drop shadow, coloured per group.</summary>
+    /// <summary>
+    /// Outline around plate texts instead of the drop shadow, set apart for names and HP text (debuff timers follow
+    /// the HP outline) and for you, enemies (the target in the preview) and allies.
+    /// </summary>
+    public bool MyNameOutline { get; set; }
+    public Vector4 MyNameOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public float MyNameOutlineThickness { get; set; } = 1.5f;
+    public bool MyHpOutline { get; set; }
+    public Vector4 MyHpOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public float MyHpOutlineThickness { get; set; } = 1.5f;
+    public bool EnemyNameOutline { get; set; }
+    public Vector4 EnemyNameOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public float EnemyNameOutlineThickness { get; set; } = 1.5f;
+    public bool EnemyHpOutline { get; set; }
+    public Vector4 EnemyHpOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public float EnemyHpOutlineThickness { get; set; } = 1.5f;
+    public bool AllyNameOutline { get; set; }
+    public Vector4 AllyNameOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public float AllyNameOutlineThickness { get; set; } = 1.5f;
+    public bool AllyHpOutline { get; set; }
+    public Vector4 AllyHpOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public float AllyHpOutlineThickness { get; set; } = 1.5f;
+
+    /// <summary>1.2 outline (one switch, a colour per group); read once by Migrate6, no longer shown.</summary>
     public bool TextOutline { get; set; }
     public float TextOutlineThickness { get; set; } = 1f;
     public Vector4 EnemyOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
@@ -236,6 +259,31 @@ public sealed class Configuration : IPluginConfiguration
         FriendlyNameColor = TextColor;
         MyNameColor = TextColor;
         Version = 5;
+        return true;
+    }
+
+    /// <summary>Version 6: the 1.2 outline becomes the name and HP outlines of you, enemies and allies.</summary>
+    public bool Migrate6()
+    {
+        if (Version >= 6)
+            return false;
+
+        if (TextOutline)
+        {
+            MyNameOutline = MyHpOutline = true;
+            EnemyNameOutline = EnemyHpOutline = true;
+            AllyNameOutline = AllyHpOutline = true;
+            MyNameOutlineColor = MyHpOutlineColor = MyOutlineColor;
+            EnemyNameOutlineColor = EnemyHpOutlineColor = EnemyOutlineColor;
+            AllyNameOutlineColor = AllyHpOutlineColor = PartyOutlineColor;
+            var thickness = Math.Clamp(TextOutlineThickness, 0.5f, 5f);
+            MyNameOutlineThickness = MyHpOutlineThickness = thickness;
+            EnemyNameOutlineThickness = EnemyHpOutlineThickness = thickness;
+            AllyNameOutlineThickness = AllyHpOutlineThickness = thickness;
+            TextOutline = false;
+        }
+
+        Version = 6;
         return true;
     }
 
@@ -370,6 +418,24 @@ public sealed class Configuration : IPluginConfiguration
         MyNameColor = defaults.MyNameColor;
         NameFont = defaults.NameFont;
         TextOutline = defaults.TextOutline;
+        MyNameOutline = defaults.MyNameOutline;
+        MyNameOutlineColor = defaults.MyNameOutlineColor;
+        MyNameOutlineThickness = defaults.MyNameOutlineThickness;
+        MyHpOutline = defaults.MyHpOutline;
+        MyHpOutlineColor = defaults.MyHpOutlineColor;
+        MyHpOutlineThickness = defaults.MyHpOutlineThickness;
+        EnemyNameOutline = defaults.EnemyNameOutline;
+        EnemyNameOutlineColor = defaults.EnemyNameOutlineColor;
+        EnemyNameOutlineThickness = defaults.EnemyNameOutlineThickness;
+        EnemyHpOutline = defaults.EnemyHpOutline;
+        EnemyHpOutlineColor = defaults.EnemyHpOutlineColor;
+        EnemyHpOutlineThickness = defaults.EnemyHpOutlineThickness;
+        AllyNameOutline = defaults.AllyNameOutline;
+        AllyNameOutlineColor = defaults.AllyNameOutlineColor;
+        AllyNameOutlineThickness = defaults.AllyNameOutlineThickness;
+        AllyHpOutline = defaults.AllyHpOutline;
+        AllyHpOutlineColor = defaults.AllyHpOutlineColor;
+        AllyHpOutlineThickness = defaults.AllyHpOutlineThickness;
         TextOutlineThickness = defaults.TextOutlineThickness;
         EnemyOutlineColor = defaults.EnemyOutlineColor;
         PartyOutlineColor = defaults.PartyOutlineColor;

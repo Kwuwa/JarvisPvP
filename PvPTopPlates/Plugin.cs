@@ -63,6 +63,7 @@ public sealed class Plugin : IDalamudPlugin
         migrated |= Configuration.Migrate3();
         migrated |= Configuration.Migrate4();
         migrated |= Configuration.Migrate5();
+        migrated |= Configuration.Migrate6();
         if (migrated)
             Configuration.Save();
 

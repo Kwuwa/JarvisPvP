@@ -27,6 +27,15 @@ internal static class SettingsCode
         nameof(Configuration.Theme),
         nameof(Configuration.PinPreview),
         nameof(Configuration.RecordEvents),
+
+        // the 1.2 outline, replaced by the per-text outlines (kept only for the settings migration)
+        nameof(Configuration.TextOutline),
+        nameof(Configuration.TextOutlineThickness),
+        nameof(Configuration.EnemyOutlineColor),
+        nameof(Configuration.PartyOutlineColor),
+        nameof(Configuration.AllianceOutlineColor),
+        nameof(Configuration.FriendlyOutlineColor),
+        nameof(Configuration.MyOutlineColor),
     };
 
     /// <summary>Highest valid value of the settings that pick an entry of a list.</summary>

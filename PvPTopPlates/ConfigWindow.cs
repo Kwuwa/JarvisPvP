@@ -540,7 +540,7 @@ internal sealed class ConfigWindow : Window, IDisposable
             "myself", configuration.ShowLocalPlayer, v => configuration.ShowLocalPlayer = v, "players");
         Check("other_friendly", configuration.ShowOtherFriendlies, v => configuration.ShowOtherFriendlies = v);
         ImGui.Spacing();
-        Slider("max_distance", configuration.MaximumDistance, 10f, 100f, Yalms("%.0f"), v => configuration.MaximumDistance = v);
+        Slider("max_distance", configuration.MaximumDistance, 10f, 100f, Yalms("%.0f"), v => configuration.MaximumDistance = v, fallback: Defaults.MaximumDistance);
         Check("highlight_target", configuration.HighlightCurrentTarget, v => configuration.HighlightCurrentTarget = v);
         if (configuration.HighlightCurrentTarget)
         {
@@ -561,28 +561,28 @@ internal sealed class ConfigWindow : Window, IDisposable
             v => configuration.PlateUnderFeet = v == 1);
         if (configuration.PlateUnderFeet)
         {
-            Slider("height_under", configuration.UnderFeetHeight, -1.5f, 1.5f, Yalms("%.2f"), v => configuration.UnderFeetHeight = v);
+            Slider("height_under", configuration.UnderFeetHeight, -1.5f, 1.5f, Yalms("%.2f"), v => configuration.UnderFeetHeight = v, fallback: Defaults.UnderFeetHeight);
             Help("height_under_help");
-            Slider("gap_under", configuration.UnderFeetGap, 0f, 60f, "%.0f px", v => configuration.UnderFeetGap = v);
+            Slider("gap_under", configuration.UnderFeetGap, 0f, 60f, "%.0f px", v => configuration.UnderFeetGap = v, fallback: Defaults.UnderFeetGap);
         }
         else
         {
-            Slider("height_above", configuration.WorldHeight, 0.5f, 4.5f, Yalms("%.2f"), v => configuration.WorldHeight = v);
+            Slider("height_above", configuration.WorldHeight, 0.5f, 4.5f, Yalms("%.2f"), v => configuration.WorldHeight = v, fallback: Defaults.WorldHeight);
             Help("height_above_help");
         }
 
-        Slider("screen_y", configuration.ScreenOffsetY, -100f, 100f, "%.0f px", v => configuration.ScreenOffsetY = v);
+        Slider("screen_y", configuration.ScreenOffsetY, -100f, 100f, "%.0f px", v => configuration.ScreenOffsetY = v, fallback: Defaults.ScreenOffsetY);
         Check("stabilize", configuration.StabilizePositions, v => configuration.StabilizePositions = v);
         Help("stabilize_help");
         if (configuration.StabilizePositions)
         {
             Indented(() =>
             {
-                Slider("follow_side", configuration.FollowHorizontal, 2f, 60f, "%.0f", v => configuration.FollowHorizontal = v);
+                Slider("follow_side", configuration.FollowHorizontal, 2f, 60f, "%.0f", v => configuration.FollowHorizontal = v, fallback: Defaults.FollowHorizontal);
                 Help("follow_side_help");
-                Slider("follow_vertical", configuration.FollowVertical, 0.5f, 60f, "%.1f", v => configuration.FollowVertical = v);
+                Slider("follow_vertical", configuration.FollowVertical, 0.5f, 60f, "%.1f", v => configuration.FollowVertical = v, fallback: Defaults.FollowVertical);
                 Help("follow_vertical_help");
-                Slider("snap", configuration.SnapYalms, 0.5f, 15f, Yalms("%.1f"), v => configuration.SnapYalms = v);
+                Slider("snap", configuration.SnapYalms, 0.5f, 15f, Yalms("%.1f"), v => configuration.SnapYalms = v, fallback: Defaults.SnapYalms);
                 Help("snap_help");
             });
         }
@@ -633,9 +633,9 @@ internal sealed class ConfigWindow : Window, IDisposable
     private void DrawBarsPage()
     {
         BeginCard("bars_shape", FontAwesomeIcon.SlidersH);
-        Slider("bar_width", configuration.BarWidth, 40f, 240f, "%.0f px", v => configuration.BarWidth = v);
-        Slider("border_thickness", configuration.BorderThickness, 0f, 6f, "%.1f px", v => configuration.BorderThickness = v);
-        Slider("corner_rounding", configuration.CornerRounding, 0f, 12f, "%.1f px", v => configuration.CornerRounding = v);
+        Slider("bar_width", configuration.BarWidth, 40f, 240f, "%.0f px", v => configuration.BarWidth = v, fallback: Defaults.BarWidth);
+        Slider("border_thickness", configuration.BorderThickness, 0f, 6f, "%.1f px", v => configuration.BorderThickness = v, fallback: Defaults.BorderThickness);
+        Slider("corner_rounding", configuration.CornerRounding, 0f, 12f, "%.1f px", v => configuration.CornerRounding = v, fallback: Defaults.CornerRounding);
         Color("border", "border", configuration.BorderColor, v => configuration.BorderColor = v, Defaults.BorderColor);
         Reset("shape",
             nameof(Configuration.BarWidth), nameof(Configuration.BorderThickness), nameof(Configuration.CornerRounding),
@@ -646,7 +646,7 @@ internal sealed class ConfigWindow : Window, IDisposable
         Check("hp_bar", configuration.ShowHpBar, v => configuration.ShowHpBar = v, "hp.show");
         if (configuration.ShowHpBar)
         {
-            Slider("hp_bar_height", configuration.BarHeight, 4f, 40f, "%.0f px", v => configuration.BarHeight = v);
+            Slider("hp_bar_height", configuration.BarHeight, 4f, 40f, "%.0f px", v => configuration.BarHeight = v, fallback: Defaults.BarHeight);
             ColorRow(
                 ("hp.enemy", "c_enemy", configuration.EnemyColor, v => configuration.EnemyColor = v, Defaults.EnemyColor),
                 ("hp.party", "c_party", configuration.PartyColor, v => configuration.PartyColor = v, Defaults.PartyColor),
@@ -676,8 +676,8 @@ internal sealed class ConfigWindow : Window, IDisposable
         Check("mp_bar", configuration.ShowMpBar, v => configuration.ShowMpBar = v, "mp.show");
         if (configuration.ShowMpBar)
         {
-            Slider("mp_bar_height", configuration.MpBarHeight, 2f, 20f, "%.0f px", v => configuration.MpBarHeight = v);
-            Slider("mp_bar_spacing", configuration.MpBarSpacing, 0f, 12f, "%.0f px", v => configuration.MpBarSpacing = v);
+            Slider("mp_bar_height", configuration.MpBarHeight, 2f, 20f, "%.0f px", v => configuration.MpBarHeight = v, fallback: Defaults.MpBarHeight);
+            Slider("mp_bar_spacing", configuration.MpBarSpacing, 0f, 12f, "%.0f px", v => configuration.MpBarSpacing = v, fallback: Defaults.MpBarSpacing);
             ColorRow(
                 ("mp.fill", "mp_colour", configuration.MpColor, v => configuration.MpColor = v, Defaults.MpColor),
                 ("mp.empty", "c_empty", configuration.EmptyMpColor, v => configuration.EmptyMpColor = v, Defaults.EmptyMpColor));
@@ -693,9 +693,9 @@ internal sealed class ConfigWindow : Window, IDisposable
         Help("lb_bar_help");
         if (configuration.ShowLimitBreakBar)
         {
-            Slider("lb_bar_height", configuration.LimitBreakBarHeight, 2f, 20f, "%.0f px", v => configuration.LimitBreakBarHeight = v);
-            Slider("lb_bar_spacing", configuration.LimitBreakBarSpacing, 0f, 12f, "%.0f px", v => configuration.LimitBreakBarSpacing = v);
-            Slider("lb_blink", configuration.LimitBreakBlinkSpeed, 0.2f, 5f, "%.1f " + Unit("per_second"), v => configuration.LimitBreakBlinkSpeed = v);
+            Slider("lb_bar_height", configuration.LimitBreakBarHeight, 2f, 20f, "%.0f px", v => configuration.LimitBreakBarHeight = v, fallback: Defaults.LimitBreakBarHeight);
+            Slider("lb_bar_spacing", configuration.LimitBreakBarSpacing, 0f, 12f, "%.0f px", v => configuration.LimitBreakBarSpacing = v, fallback: Defaults.LimitBreakBarSpacing);
+            Slider("lb_blink", configuration.LimitBreakBlinkSpeed, 0.2f, 5f, "%.1f " + Unit("per_second"), v => configuration.LimitBreakBlinkSpeed = v, fallback: Defaults.LimitBreakBlinkSpeed);
             ColorRow(
                 ("lb.charge", "c_charge", configuration.LimitBreakColor, v => configuration.LimitBreakColor = v, Defaults.LimitBreakColor),
                 ("lb.empty", "c_empty", configuration.LimitBreakEmptyColor, v => configuration.LimitBreakEmptyColor = v, Defaults.LimitBreakEmptyColor));
@@ -726,7 +726,7 @@ internal sealed class ConfigWindow : Window, IDisposable
                     configuration.NameFont,
                     new[] { $"Axis ({game})", $"Jupiter ({game})", $"Trump Gothic ({game})", "Noto Sans", "Inconsolata" },
                     v => configuration.NameFont = v);
-                Slider("name_size", configuration.NameFontScale, 0.5f, 2.5f, "%.2fx", v => configuration.NameFontScale = v);
+                Slider("name_size", configuration.NameFontScale, 0.5f, 2.5f, "%.2fx", v => configuration.NameFontScale = v, fallback: Defaults.NameFontScale);
                 ImGui.TextDisabled(T("name_colours"));
                 ColorRow(
                     ("name.enemy", "c_enemy", configuration.EnemyNameColor, v => configuration.EnemyNameColor = v, Defaults.EnemyNameColor),
@@ -749,39 +749,61 @@ internal sealed class ConfigWindow : Window, IDisposable
                     configuration.HpTextFormat,
                     new[] { T("fmt_percent"), T("fmt_current"), T("fmt_current_max"), T("fmt_current_short"), T("fmt_current_max_short") },
                     v => configuration.HpTextFormat = v);
-                Slider("hp_text_size", configuration.HpTextFontScale, 0.5f, 2.5f, "%.2fx", v => configuration.HpTextFontScale = v);
+                Slider("hp_text_size", configuration.HpTextFontScale, 0.5f, 2.5f, "%.2fx", v => configuration.HpTextFontScale = v, fallback: Defaults.HpTextFontScale);
             });
         }
 
         Color("text_colour", "text_colour", configuration.TextColor, v => configuration.TextColor = v, Defaults.TextColor);
 
-        Check("text_outline", configuration.TextOutline, v => configuration.TextOutline = v);
-        Help("text_outline_help");
-        if (configuration.TextOutline)
-        {
-            Indented(() =>
-            {
-                Slider("outline_thickness", configuration.TextOutlineThickness, 1f, 4f, "%.0f px", v => configuration.TextOutlineThickness = v);
-                ImGui.TextDisabled(T("outline_colours"));
-                ColorRow(
-                    ("outline.enemy", "c_enemy", configuration.EnemyOutlineColor, v => configuration.EnemyOutlineColor = v, Defaults.EnemyOutlineColor),
-                    ("outline.party", "c_party", configuration.PartyOutlineColor, v => configuration.PartyOutlineColor = v, Defaults.PartyOutlineColor),
-                    ("outline.alliance", "c_alliance", configuration.AllianceOutlineColor, v => configuration.AllianceOutlineColor = v, Defaults.AllianceOutlineColor));
-                ColorRow(
-                    ("outline.friendly", "c_friendly", configuration.FriendlyOutlineColor, v => configuration.FriendlyOutlineColor = v, Defaults.FriendlyOutlineColor),
-                    ("outline.myself", "c_myself", configuration.MyOutlineColor, v => configuration.MyOutlineColor = v, Defaults.MyOutlineColor));
-            });
-        }
-
         Reset("text",
             nameof(Configuration.ShowNames), nameof(Configuration.NameFontScale), nameof(Configuration.ShowHpPercent),
             nameof(Configuration.HpTextFormat), nameof(Configuration.HpTextFontScale), nameof(Configuration.TextColor),
             nameof(Configuration.EnemyNameColor), nameof(Configuration.PartyNameColor), nameof(Configuration.AllianceNameColor),
-            nameof(Configuration.FriendlyNameColor), nameof(Configuration.MyNameColor), nameof(Configuration.NameFont),
-            nameof(Configuration.TextOutline), nameof(Configuration.TextOutlineThickness),
-            nameof(Configuration.EnemyOutlineColor), nameof(Configuration.PartyOutlineColor), nameof(Configuration.AllianceOutlineColor),
-            nameof(Configuration.FriendlyOutlineColor), nameof(Configuration.MyOutlineColor));
+            nameof(Configuration.FriendlyNameColor), nameof(Configuration.MyNameColor), nameof(Configuration.NameFont));
         EndCard();
+
+        // outline: names and HP text apart, for you, enemies (the target) and allies
+        BeginCard("sec_outline", FontAwesomeIcon.Highlighter);
+        ImGui.TextDisabled(T("outline_help"));
+        foreach (var (group, caption) in new[] { ("My", "pv_you"), ("Enemy", "pv_target"), ("Ally", "pv_ally") })
+        {
+            ImGui.Spacing();
+            ImGui.TextColored(Current.Accent, T(caption));
+            Indented(() =>
+            {
+                OutlineRow(group, "Name", "outline_name");
+                OutlineRow(group, "Hp", "outline_hp");
+            });
+        }
+
+        Reset("outline", nameof(Configuration.MyNameOutline), nameof(Configuration.MyNameOutlineColor), nameof(Configuration.MyNameOutlineThickness), nameof(Configuration.MyHpOutline), nameof(Configuration.MyHpOutlineColor), nameof(Configuration.MyHpOutlineThickness), nameof(Configuration.EnemyNameOutline), nameof(Configuration.EnemyNameOutlineColor), nameof(Configuration.EnemyNameOutlineThickness), nameof(Configuration.EnemyHpOutline), nameof(Configuration.EnemyHpOutlineColor), nameof(Configuration.EnemyHpOutlineThickness), nameof(Configuration.AllyNameOutline), nameof(Configuration.AllyNameOutlineColor), nameof(Configuration.AllyNameOutlineThickness), nameof(Configuration.AllyHpOutline), nameof(Configuration.AllyHpOutlineColor), nameof(Configuration.AllyHpOutlineThickness));
+        EndCard();
+    }
+
+    /// <summary>One outline: switch + colour on a line, thickness under it while it is on.</summary>
+    private void OutlineRow(string group, string kind, string key)
+    {
+        var prefix = group + kind;
+        var type = typeof(Configuration);
+        var enabled = type.GetProperty(prefix + "Outline")!;
+        var colour = type.GetProperty(prefix + "OutlineColor")!;
+        var thickness = type.GetProperty(prefix + "OutlineThickness")!;
+        var on = (bool)enabled.GetValue(configuration)!;
+        Check(key, on, v => enabled.SetValue(configuration, v), $"outline.{prefix}");
+        ImGui.SameLine();
+        Swatch($"outline.{prefix}.colour", (Vector4)colour.GetValue(configuration)!, v => colour.SetValue(configuration, v), (Vector4)colour.GetValue(Defaults)!);
+        if (on)
+        {
+            Indented(() => Slider(
+                "outline_thickness",
+                (float)thickness.GetValue(configuration)!,
+                0.5f,
+                5f,
+                "%.1f px",
+                v => thickness.SetValue(configuration, v),
+                $"outline.{prefix}.thickness",
+                (float)thickness.GetValue(Defaults)!));
+        }
     }
 
     private void DrawIconsPage()
@@ -795,10 +817,10 @@ internal sealed class ConfigWindow : Window, IDisposable
             Check("match_height", configuration.JobIconAutoSize, v => configuration.JobIconAutoSize = v, "job.match");
             Help("match_height_help");
             if (!configuration.JobIconAutoSize)
-                Indented(() => Slider("size", configuration.JobIconSize, 12f, 72f, "%.0f px", v => configuration.JobIconSize = v, "job.size"));
-            Slider("spacing", configuration.JobIconSpacing, 0f, 20f, "%.0f px", v => configuration.JobIconSpacing = v, "job.spacing");
-            Slider("x_offset", configuration.JobIconOffsetX, -80f, 80f, "%.0f px", v => configuration.JobIconOffsetX = v, "job.x");
-            Slider("y_offset", configuration.JobIconOffsetY, -80f, 80f, "%.0f px", v => configuration.JobIconOffsetY = v, "job.y");
+                Indented(() => Slider("size", configuration.JobIconSize, 12f, 72f, "%.0f px", v => configuration.JobIconSize = v, "job.size", fallback: Defaults.JobIconSize));
+            Slider("spacing", configuration.JobIconSpacing, 0f, 20f, "%.0f px", v => configuration.JobIconSpacing = v, "job.spacing", fallback: Defaults.JobIconSpacing);
+            Slider("x_offset", configuration.JobIconOffsetX, -80f, 80f, "%.0f px", v => configuration.JobIconOffsetX = v, "job.x", fallback: Defaults.JobIconOffsetX);
+            Slider("y_offset", configuration.JobIconOffsetY, -80f, 80f, "%.0f px", v => configuration.JobIconOffsetY = v, "job.y", fallback: Defaults.JobIconOffsetY);
             Check("elixir_fill", configuration.ShowElixirCast, v => configuration.ShowElixirCast = v);
             if (configuration.ShowElixirCast)
             {
@@ -828,17 +850,17 @@ internal sealed class ConfigWindow : Window, IDisposable
                 {
                     Check("glow_active", configuration.GuardActiveGlow, v => configuration.GuardActiveGlow = v);
                     Check("countdown", configuration.ShowGuardCooldownText, v => configuration.ShowGuardCooldownText = v);
-                    Slider("border_thickness", configuration.GuardIconBorderThickness, 0f, 6f, "%.1f px", v => configuration.GuardIconBorderThickness = v, "guard.border");
+                    Slider("border_thickness", configuration.GuardIconBorderThickness, 0f, 6f, "%.1f px", v => configuration.GuardIconBorderThickness = v, "guard.border", fallback: Defaults.GuardIconBorderThickness);
                 });
             }
 
             Check("match_height", configuration.GuardIconAutoSize, v => configuration.GuardIconAutoSize = v, "guard.match");
             Help("match_height_help");
             if (!configuration.GuardIconAutoSize)
-                Indented(() => Slider("size", configuration.GuardSymbolSize, 8f, 72f, "%.0f px", v => configuration.GuardSymbolSize = v, "guard.size"));
-            Slider("spacing", configuration.GuardSymbolSpacing, 0f, 20f, "%.0f px", v => configuration.GuardSymbolSpacing = v, "guard.spacing");
-            Slider("x_offset", configuration.GuardIconOffsetX, -80f, 80f, "%.0f px", v => configuration.GuardIconOffsetX = v, "guard.x");
-            Slider("y_offset", configuration.GuardIconOffsetY, -80f, 80f, "%.0f px", v => configuration.GuardIconOffsetY = v, "guard.y");
+                Indented(() => Slider("size", configuration.GuardSymbolSize, 8f, 72f, "%.0f px", v => configuration.GuardSymbolSize = v, "guard.size", fallback: Defaults.GuardSymbolSize));
+            Slider("spacing", configuration.GuardSymbolSpacing, 0f, 20f, "%.0f px", v => configuration.GuardSymbolSpacing = v, "guard.spacing", fallback: Defaults.GuardSymbolSpacing);
+            Slider("x_offset", configuration.GuardIconOffsetX, -80f, 80f, "%.0f px", v => configuration.GuardIconOffsetX = v, "guard.x", fallback: Defaults.GuardIconOffsetX);
+            Slider("y_offset", configuration.GuardIconOffsetY, -80f, 80f, "%.0f px", v => configuration.GuardIconOffsetY = v, "guard.y", fallback: Defaults.GuardIconOffsetY);
             ColorRow(
                 ("guard.ready", "c_ready", configuration.GuardReadyColor, v => configuration.GuardReadyColor = v, Defaults.GuardReadyColor),
                 ("guard.active", "c_active", configuration.GuardActiveColor, v => configuration.GuardActiveColor = v, Defaults.GuardActiveColor),
@@ -887,10 +909,10 @@ internal sealed class ConfigWindow : Window, IDisposable
             }
 
             Check("timers", configuration.ShowDebuffTimers, v => configuration.ShowDebuffTimers = v);
-            Slider("icon_size", configuration.DebuffIconSize, 12f, 64f, "%.0f px", v => configuration.DebuffIconSize = v, "debuff.size");
-            Slider("spacing", configuration.DebuffSpacing, 0f, 12f, "%.0f px", v => configuration.DebuffSpacing = v, "debuff.spacing");
-            Slider("gap_plate", configuration.DebuffRowGap, 0f, 30f, "%.0f px", v => configuration.DebuffRowGap = v, "debuff.gap");
-            Slider("max_shown", configuration.MaxDebuffs, 1f, 20f, "%.0f", v => configuration.MaxDebuffs = v, "debuff.max");
+            Slider("icon_size", configuration.DebuffIconSize, 12f, 64f, "%.0f px", v => configuration.DebuffIconSize = v, "debuff.size", fallback: Defaults.DebuffIconSize);
+            Slider("spacing", configuration.DebuffSpacing, 0f, 12f, "%.0f px", v => configuration.DebuffSpacing = v, "debuff.spacing", fallback: Defaults.DebuffSpacing);
+            Slider("gap_plate", configuration.DebuffRowGap, 0f, 30f, "%.0f px", v => configuration.DebuffRowGap = v, "debuff.gap", fallback: Defaults.DebuffRowGap);
+            Slider("max_shown", configuration.MaxDebuffs, 1f, 20f, "%.0f", v => configuration.MaxDebuffs = v, "debuff.max", fallback: Defaults.MaxDebuffs);
         }
 
         Reset("debuffs",
@@ -907,9 +929,9 @@ internal sealed class ConfigWindow : Window, IDisposable
         Help("signs_above_help");
         if (configuration.MoveSignMarkers)
         {
-            Slider("size", configuration.SignMarkerSize, 12f, 200f, "%.0f px", v => configuration.SignMarkerSize = v, "marker.size");
-            Slider("gap", configuration.SignMarkerGap, 0f, 30f, "%.0f px", v => configuration.SignMarkerGap = v, "marker.gap");
-            Slider("y_offset", configuration.SignMarkerOffsetY, -80f, 80f, "%.0f px", v => configuration.SignMarkerOffsetY = v, "marker.y");
+            Slider("size", configuration.SignMarkerSize, 12f, 200f, "%.0f px", v => configuration.SignMarkerSize = v, "marker.size", fallback: Defaults.SignMarkerSize);
+            Slider("gap", configuration.SignMarkerGap, 0f, 30f, "%.0f px", v => configuration.SignMarkerGap = v, "marker.gap", fallback: Defaults.SignMarkerGap);
+            Slider("y_offset", configuration.SignMarkerOffsetY, -80f, 80f, "%.0f px", v => configuration.SignMarkerOffsetY = v, "marker.y", fallback: Defaults.SignMarkerOffsetY);
         }
 
         Reset("signs",
@@ -927,8 +949,8 @@ internal sealed class ConfigWindow : Window, IDisposable
         {
             Indented(() =>
             {
-                Slider("dot_size", configuration.TargetingDotSize, 2f, 16f, "%.0f px", v => configuration.TargetingDotSize = v);
-                Slider("dot_offset", configuration.TargetingDotOffsetY, -60f, 60f, "%.0f px", v => configuration.TargetingDotOffsetY = v);
+                Slider("dot_size", configuration.TargetingDotSize, 2f, 16f, "%.0f px", v => configuration.TargetingDotSize = v, fallback: Defaults.TargetingDotSize);
+                Slider("dot_offset", configuration.TargetingDotOffsetY, -60f, 60f, "%.0f px", v => configuration.TargetingDotOffsetY = v, fallback: Defaults.TargetingDotOffsetY);
                 ColorRow(
                     ("role.tank", "c_tank", configuration.TankColor, v => configuration.TankColor = v, Defaults.TankColor),
                     ("role.healer", "c_healer", configuration.HealerColor, v => configuration.HealerColor = v, Defaults.HealerColor),
@@ -943,9 +965,9 @@ internal sealed class ConfigWindow : Window, IDisposable
             Indented(() =>
             {
                 Check("red_glow_icons", configuration.TargetingMeIconGlow, v => configuration.TargetingMeIconGlow = v);
-                Slider("icon_size", configuration.TargetingIconSize, 12f, 64f, "%.0f px", v => configuration.TargetingIconSize = v, "tm.size");
-                Slider("height_above_me", configuration.TargetingIconHeight, 1f, 4.5f, Yalms("%.2f"), v => configuration.TargetingIconHeight = v);
-                Slider("y_offset", configuration.TargetingIconOffsetY, -100f, 100f, "%.0f px", v => configuration.TargetingIconOffsetY = v, "tm.y");
+                Slider("icon_size", configuration.TargetingIconSize, 12f, 64f, "%.0f px", v => configuration.TargetingIconSize = v, "tm.size", fallback: Defaults.TargetingIconSize);
+                Slider("height_above_me", configuration.TargetingIconHeight, 1f, 4.5f, Yalms("%.2f"), v => configuration.TargetingIconHeight = v, fallback: Defaults.TargetingIconHeight);
+                Slider("y_offset", configuration.TargetingIconOffsetY, -100f, 100f, "%.0f px", v => configuration.TargetingIconOffsetY = v, "tm.y", fallback: Defaults.TargetingIconOffsetY);
             });
         }
 
@@ -1176,7 +1198,7 @@ internal sealed class ConfigWindow : Window, IDisposable
     }
 
     /// <summary>Every version, newest first; 1.0 is the release. Texts are in Loc ("cl_" + version, one line per change).</summary>
-    private static readonly string[] ChangelogVersions = { "1.2", "1.1", "1.0" };
+    private static readonly string[] ChangelogVersions = { "1.2.1", "1.2", "1.1", "1.0" };
 
     private void DrawChangelogPage()
     {
@@ -1553,9 +1575,10 @@ internal sealed class ConfigWindow : Window, IDisposable
 
     /// <summary>
     /// A slider with a number field and - / + buttons (one step of the shown precision: 1, 0.1 or 0.05), like the
-    /// sliders of Customize+ / Glamourer. Typed numbers apply when the field is left or Enter is pressed.
+    /// sliders of Customize+ / Glamourer, and a reset arrow back to the default. Typed numbers apply when the field
+    /// is left or Enter is pressed.
     /// </summary>
-    private void Slider(string key, float value, float minimum, float maximum, string format, Action<float> apply, string? id = null)
+    private void Slider(string key, float value, float minimum, float maximum, string format, Action<float> apply, string? id = null, float? fallback = null)
     {
         var s = ImGuiHelpers.GlobalScale;
         var spacing = ImGui.GetStyle().ItemInnerSpacing.X;
@@ -1593,6 +1616,34 @@ internal sealed class ConfigWindow : Window, IDisposable
         ImGui.SameLine(0f, spacing);
         if (ImGui.Button("+", button))
             Set(value + step);
+        if (fallback is { } original)
+        {
+            // the turning arrow puts this one setting back to its default
+            ImGui.SameLine(0f, spacing);
+            var reset = ImGui.Button("##reset", button);
+            var buttonMin = ImGui.GetItemRectMin();
+            var buttonMax = ImGui.GetItemRectMax();
+            using (Plugin.PluginInterface.UiBuilder.IconFontHandle.Push())
+            {
+                // the icon is drawn centred on the button (as a button label the icon font sat off centre)
+                var glyph = FontAwesomeIcon.UndoAlt.ToIconString();
+                var glyphSize = ImGui.CalcTextSize(glyph);
+                var glyphPosition = ((buttonMin + buttonMax) * 0.5f) - (glyphSize * 0.5f);
+                ImGui.GetWindowDrawList().AddText(
+                    new Vector2(MathF.Round(glyphPosition.X), MathF.Round(glyphPosition.Y)),
+                    ImGui.GetColorU32(ImGuiCol.Text),
+                    glyph);
+            }
+
+            if (ImGui.IsItemHovered())
+                Tooltip(T("reset_value"));
+            if (reset && Math.Abs(original - value) > 0.0001f)
+            {
+                apply(original);
+                changed = true;
+            }
+        }
+
         ImGui.PopID();
 
         ImGui.SameLine(0f, spacing);
@@ -1613,10 +1664,13 @@ internal sealed class ConfigWindow : Window, IDisposable
 
         // the chosen entry stands out in the open list (the themes' header colour is too faint for it)
         var accent = Current.Accent;
-        ImGui.PushStyleColor(ImGuiCol.Header, accent with { W = 0.45f });
-        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, accent with { W = 0.30f });
-        ImGui.PushStyleColor(ImGuiCol.HeaderActive, accent with { W = 0.55f });
+        // chosen = accent, the entry under the mouse = a neutral light tint, so the two never look alike
+        ImGui.PushStyleColor(ImGuiCol.Header, accent with { W = 0.50f });
+        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Current.Text with { W = 0.14f });
+        ImGui.PushStyleColor(ImGuiCol.HeaderActive, Current.Text with { W = 0.22f });
+        PushPopupBorder();
         var picked = ImGui.Combo(L(key, id ?? key), ref current, string.Join("\0", items) + "\0");
+        PopPopupBorder();
         ImGui.PopStyleColor(3);
         if (picked)
         {
@@ -1646,7 +1700,10 @@ internal sealed class ConfigWindow : Window, IDisposable
     /// <summary>A colour picker; right-click puts the colour back to its default.</summary>
     private void Color(string id, string key, Vector4 color, Action<Vector4> apply, Vector4 fallback)
     {
-        if (ImGui.ColorEdit4(L(key, id), ref color, ColorFlags))
+        PushPopupBorder();
+        var edited = ImGui.ColorEdit4(L(key, id), ref color, ColorFlags);
+        PopPopupBorder();
+        if (edited)
         {
             apply(color);
             changed = true;
@@ -1657,7 +1714,10 @@ internal sealed class ConfigWindow : Window, IDisposable
 
     private void Swatch(string id, Vector4 color, Action<Vector4> apply, Vector4 fallback)
     {
-        if (ImGui.ColorEdit4($"###{id}", ref color, ColorFlags | ImGuiColorEditFlags.NoLabel))
+        PushPopupBorder();
+        var edited = ImGui.ColorEdit4($"###{id}", ref color, ColorFlags | ImGuiColorEditFlags.NoLabel);
+        PopPopupBorder();
+        if (edited)
         {
             apply(color);
             changed = true;
@@ -1744,13 +1804,41 @@ internal sealed class ConfigWindow : Window, IDisposable
             Tooltip(text);
     }
 
+    /// <summary>
+    /// Open lists and colour pickers get the border of the main window (the theme's border colour) and the slightly
+    /// lighter frame colour as background, so they stand out from the card under them.
+    /// </summary>
+    private static void PushPopupBorder()
+    {
+        var palette = Current;
+        ImGui.PushStyleColor(ImGuiCol.Border, palette.Border with { W = 1f });
+        ImGui.PushStyleColor(ImGuiCol.PopupBg, Vector4.Lerp(palette.CardBg, palette.Frame, 0.6f) with { W = 1f });
+        ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, Math.Max(1f, palette.BorderSize));
+    }
+
+    private static void PopPopupBorder()
+    {
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor(2);
+    }
+
+    /// <summary>Tooltips stand out from the window: a background tinted with the accent and the main window border.</summary>
     private static void Tooltip(string text)
     {
+        var palette = Current;
+        var s = ImGuiHelpers.GlobalScale;
+        var background = Vector4.Lerp(palette.CardBg, palette.Accent, 0.22f) with { W = 1f };
+        ImGui.PushStyleColor(ImGuiCol.PopupBg, background);
+        ImGui.PushStyleColor(ImGuiCol.Border, palette.Border with { W = 1f });
+        ImGui.PushStyleVar(ImGuiStyleVar.PopupBorderSize, Math.Max(1f, palette.BorderSize));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(9f, 6f) * s);
         ImGui.BeginTooltip();
         ImGui.PushTextWrapPos(ImGui.GetFontSize() * 28f);
         ImGui.TextUnformatted(text);
         ImGui.PopTextWrapPos();
         ImGui.EndTooltip();
+        ImGui.PopStyleVar(2);
+        ImGui.PopStyleColor(2);
     }
 
     private static void DisabledHelp(string key)

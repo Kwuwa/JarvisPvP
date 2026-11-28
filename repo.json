@@ -3,8 +3,8 @@
     "Author": "Kwuwa (based on PvP TopPlates by Petra105)",
     "Name": "Jarvis PvP",
     "InternalName": "JarvisPvP",
-    "AssemblyVersion": "1.2.0.0",
-    "Description": "Draws clear plates for players in PvP above the 3D world: HP with barrier, MP and Limit Break bars, job icon, debuffs, sign markers and the enemies that have you as their target. Name fonts and colours, text outline per group. Settings window with a live preview, four themes, a changelog, diagnostics, shareable settings codes and English / French / German / Japanese / Russian texts.\n\nUse /jpvp to open the settings. Based on PvP TopPlates by Petra105 (MIT licence).",
+    "AssemblyVersion": "1.2.1.0",
+    "Description": "Draws clear plates for players in PvP above the 3D world: HP with barrier, MP and Limit Break bars, job icon, debuffs, sign markers and the enemies that have you as their target. Name fonts and colours, text outline for names and HP per group. Settings window with a live preview, four themes, a changelog, diagnostics, shareable settings codes and English / French / German / Japanese / Russian texts.\n\nUse /jpvp to open the settings. Based on PvP TopPlates by Petra105 (MIT licence).",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/Kwuwa/JarvisPvP",
     "Tags": [
@@ -22,12 +22,12 @@
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/images/icon.png",
     "Punchline": "Clear PvP plates: HP, MP, Limit Break, debuffs, signs and who targets you.",
-    "Changelog": "1.2: Changelog page. Sliders with a number field and - / + buttons. The chosen entry of a drop-down list is highlighted. Name fonts (Axis, Jupiter, Trump Gothic, Noto Sans, Inconsolata). Text outline for names, HP and timers with its own colour for each group. Right-click a colour to reset it. Hipolink link under About. The preview no longer shakes.\n\n1.1: Russian interface, settings codes to share, name colour for each group.\n\n1.0: first public release as Jarvis PvP.",
+    "Changelog": "1.2.1: Text outline set apart for names and HP, for you, the target and allies, each with its own colour and thickness; smooth outlines on large text. A reset arrow on every slider. Tooltips, drop-down lists and colour pickers stand out from the window.\n\n1.2: Changelog page. Sliders with a number field and - / + buttons. The chosen entry of a drop-down list is highlighted. Name fonts (Axis, Jupiter, Trump Gothic, Noto Sans, Inconsolata). Text outline for names, HP and timers with its own colour for each group. Right-click a colour to reset it. Hipolink link under About. The preview no longer shakes.\n\n1.1: Russian interface, settings codes to share, name colour for each group.\n\n1.0: first public release as Jarvis PvP.",
     "AcceptsFeedback": true,
     "IsHide": false,
     "IsTestingExclusive": false,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/JarvisPvP-1.2.0.0.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/JarvisPvP-1.2.0.0.zip",
-    "LastUpdate": 1795834752
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/JarvisPvP-1.2.1.0.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/JarvisPvP-1.2.1.0.zip",
+    "LastUpdate": 1795836658
   }
 ]
