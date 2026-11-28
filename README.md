@@ -7,9 +7,10 @@ A Dalamud plugin, based on <a href="https://github.com/Petra105/PvPTopPlates">Pv
 
 <p align="center">
 <img src="https://img.shields.io/badge/Dalamud%20API-15-blue" alt="Dalamud API 15">
-<img src="https://img.shields.io/badge/version-1.1-gold" alt="Version 1.1">
+<img src="https://img.shields.io/badge/version-1.2-gold" alt="Version 1.2">
 <img src="https://img.shields.io/badge/licence-MIT-green" alt="MIT licence">
 <a href="https://boosty.to/aloyb"><img src="https://img.shields.io/badge/support-Boosty-f15f2c" alt="Support on Boosty"></a>
+<a href="https://hipolink.net/kwuwa"><img src="https://img.shields.io/badge/support-Hipolink-6b5cf2" alt="Support on Hipolink"></a>
 </p>
 
 ---
@@ -27,15 +28,20 @@ Every player in PvP gets a plate that terrain and walls cannot hide, drawn from 
 - **Signs** (attack 1-8, bind, ignore, shapes) moved above the whole plate.
 - **Enemies targeting you**: a role-colour dot under them, their job icons above your head, a red glow and crossed
   swords on their job icon.
-- **Name and HP text** in several formats, with its own name colour for enemies, party, alliance, other friendly
-  players and yourself. The plate sits above the head or under the feet and follows jumps and dashes exactly.
+- **Name and HP text** in several formats. Five name fonts (Axis, Jupiter, Trump Gothic, Noto Sans, Inconsolata)
+  and a name colour for enemies, party, alliance, other friendly players and yourself.
+- **Text outline** around names, HP and timers, with its own outline colour for each group.
+- The plate sits above the head or under the feet and follows jumps and dashes exactly.
 
 ### The settings window (`/jpvp`)
 
-- Pages: Preview, General, Bars, Text, Icons, Debuffs & signs, Targeting me, Appearance, Diagnostics, About.
+- Pages: Preview, General, Bars, Text, Icons, Debuffs & signs, Targeting me, Appearance, Changelog, Diagnostics,
+  About.
 - A **live preview** of you, your target and an ally, animated. On each settings page it shows only what that page
   sets.
 - **Test in world**: a sample enemy plate above your own character, to set everything up without a match.
+- Every slider has a number field and - / + buttons; right-click a colour to put it back to its default.
+- A **Changelog** page with the changes of every version.
 - Themes: Midnight blue, Black, Light and Crystal (classic blue Final Fantasy menu).
 - **Share your settings**: copy a settings code (it starts with `JPVP1:`), send it to a friend, and they import it
   with one click. An import can be undone. The language and theme of the window are not part of the code.
@@ -83,7 +89,8 @@ Recorded events contain character names, so look over the report before sending 
 
 ## Support
 
-Jarvis PvP is free. If you like it, you can support me on [Boosty](https://boosty.to/aloyb).
+Jarvis PvP is free. If you like it, you can support me on [Boosty](https://boosty.to/aloyb) or
+[Hipolink](https://hipolink.net/kwuwa).
 
 ## Credits
 

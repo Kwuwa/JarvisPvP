@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -164,6 +165,13 @@ internal sealed class OverlayRenderer : IDisposable
     private uint[]? previewDebuffIcons;
     private readonly (Vector2 Min, Vector2 Max)[] previewExtents = new (Vector2 Min, Vector2 Max)[21];   // focus x slot
     private readonly bool[] previewMeasured = new bool[21];
+
+    // The animated preview plates change size (Guard glow, debuffs coming and going); the layout uses what they covered
+    // over the last two cycles, so the slots do not shake. It grows at once and shrinks back within ~24 s.
+    private const float EnvelopeCycle = 12f;
+    private readonly (Vector2 Min, Vector2 Max)[] previewPrevious = new (Vector2 Min, Vector2 Max)[21];
+    private readonly bool[] previewHasPrevious = new bool[21];
+    private long previewCycle = -1;
     private readonly float[] previewFit = { 1f, 1f, 1f, 1f, 1f, 1f, 1f };
     private ScaledFont previewNameFont = new();
     private ScaledFont previewHpFont = new();
@@ -557,8 +565,17 @@ internal sealed class OverlayRenderer : IDisposable
     private (Vector2 Min, Vector2 Max) PlateExtents(int focusIndex, int slot)
     {
         var index = (focusIndex * 3) + slot;
+        if (previewMeasured[index] && previewHasPrevious[index])
+        {
+            var (min, max) = previewExtents[index];
+            var (oldMin, oldMax) = previewPrevious[index];
+            return (Vector2.Min(min, oldMin), Vector2.Max(max, oldMax));
+        }
+
         if (previewMeasured[index])
             return previewExtents[index];
+        if (previewHasPrevious[index])
+            return previewPrevious[index];
 
         var half = (configuration.BarWidth * 0.5f) + 30f;
         return (new Vector2(-half, -30f), new Vector2(half, BarStackHeight() + 10f));
@@ -578,9 +595,24 @@ internal sealed class OverlayRenderer : IDisposable
     {
         DrawBar(drawList, candidate, scale);
         var index = (focusIndex * 3) + slot;
-        previewExtents[index] = drawnMinimum.X <= drawnMaximum.X
+        var cycle = (long)(PreviewTime() / EnvelopeCycle);
+        if (cycle != previewCycle)
+        {
+            previewCycle = cycle;
+            for (var i = 0; i < previewExtents.Length; i++)
+            {
+                previewPrevious[i] = previewExtents[i];
+                previewHasPrevious[i] = previewMeasured[i];
+                previewMeasured[i] = false;
+            }
+        }
+
+        var measured = drawnMinimum.X <= drawnMaximum.X
             ? ((drawnMinimum - candidate.ScreenPosition) / scale, (drawnMaximum - candidate.ScreenPosition) / scale)
             : (Vector2.Zero, Vector2.Zero);
+        if (previewMeasured[index])
+            measured = (Vector2.Min(measured.Item1, previewExtents[index].Min), Vector2.Max(measured.Item2, previewExtents[index].Max));
+        previewExtents[index] = measured;
         previewMeasured[index] = true;
     }
 
@@ -1329,6 +1361,7 @@ internal sealed class OverlayRenderer : IDisposable
         var borderThickness = configuration.BorderThickness * uiScale;
         var rounding = configuration.CornerRounding * uiScale;
         var borderOffset = new Vector2(borderThickness);
+        plateOutline = OutlineColor(candidate.Relation);
         ResetDrawn();       // everything below reports its rectangle (Grow): plate extents for the preview and the UI cut
 
         var showHp = configuration.ShowHpBar;
@@ -1901,7 +1934,7 @@ internal sealed class OverlayRenderer : IDisposable
             var nativeSize = Math.Max(1f, ImGui.GetFontSize());
             var textSize = ImGui.CalcTextSize(text) * (fontSize / nativeSize);
             var position = center - (textSize * 0.5f);
-            var outline = ToColor(new Vector4(0f, 0f, 0f, 0.95f));
+            var outline = ToColor(plateOutline ?? new Vector4(0f, 0f, 0f, 0.95f));
             var offset = Math.Max(1f, 1.2f * uiScale);
             foreach (var direction in OutlineOffsets)
                 drawList.AddText(font, fontSize, position + (direction * offset), outline, text);
@@ -2604,6 +2637,23 @@ internal sealed class OverlayRenderer : IDisposable
         DrawCrispText(drawList, font, scale, text, configuration.TextColor, place, uiScale);
     }
 
+    /// <summary>Outline colour of the plate being drawn (names, HP text, timers); null = the usual drop shadow.</summary>
+    private Vector4? plateOutline;
+
+    private Vector4? OutlineColor(PlayerRelation relation)
+    {
+        if (!configuration.TextOutline)
+            return null;
+        return relation switch
+        {
+            PlayerRelation.Enemy => configuration.EnemyOutlineColor,
+            PlayerRelation.Party => configuration.PartyOutlineColor,
+            PlayerRelation.Alliance => configuration.AllianceOutlineColor,
+            PlayerRelation.LocalPlayer => configuration.MyOutlineColor,
+            _ => configuration.FriendlyOutlineColor,
+        };
+    }
+
     private Vector4 NameColor(PlayerRelation relation) => relation switch
     {
         PlayerRelation.Enemy => configuration.EnemyNameColor,
@@ -2626,7 +2676,7 @@ internal sealed class OverlayRenderer : IDisposable
         IDisposable? pushed = null;
         try
         {
-            var handle = font.Get(BaseTextPixels * scale);
+            var handle = font.Get(BaseTextPixels * scale, ReferenceEquals(font, nameFont) ? configuration.NameFont : 0);
             float size;
             if (handle is { Available: true })
             {
@@ -2643,8 +2693,27 @@ internal sealed class OverlayRenderer : IDisposable
             var position = place(textSize);
             position = new Vector2(MathF.Round(position.X), MathF.Round(position.Y));
             var shadow = MathF.Max(1f, MathF.Round(size / BaseTextPixels)) * Math.Max(1f, uiScale);
-            Grow(position, position + textSize + new Vector2(shadow));
-            drawList.AddText(imFont, size, position + new Vector2(shadow), ToColor(new Vector4(0f, 0f, 0f, 0.95f)), text);
+            if (plateOutline is { } outline)
+            {
+                // outline: the text repeated around itself (8 directions per pixel ring), drawn under the text
+                var thickness = Math.Max(1f, MathF.Round(configuration.TextOutlineThickness * Math.Max(1f, uiScale * size / BaseTextPixels)));
+                Grow(position - new Vector2(thickness), position + textSize + new Vector2(thickness));
+                if (outline.W > 0f)
+                {
+                    var outlineColor = ToColor(outline);
+                    for (var ring = 1; ring <= (int)thickness; ring++)
+                    {
+                        foreach (var direction in OutlineOffsets)
+                            drawList.AddText(imFont, size, position + (direction * ring), outlineColor, text);
+                    }
+                }
+            }
+            else
+            {
+                Grow(position, position + textSize + new Vector2(shadow));
+                drawList.AddText(imFont, size, position + new Vector2(shadow), ToColor(new Vector4(0f, 0f, 0f, 0.95f)), text);
+            }
+
             drawList.AddText(imFont, size, position, ToColor(color), text);
         }
         finally
@@ -2653,22 +2722,41 @@ internal sealed class OverlayRenderer : IDisposable
         }
     }
 
+    /// <summary>Latin, Latin-1 and Latin Extended-A/B: every character of player names.</summary>
+    private static readonly ushort[] NameGlyphs = { 0x0020, 0x024F, 0 };
+
     private sealed class ScaledFont : IDisposable
     {
         private IFontHandle? handle;
         private float size;
 
-        public IFontHandle? Get(float wanted)
+        private int family;
+
+        /// <summary>A font at an exact pixel size: 0 Axis, 1 Jupiter, 2 Trump Gothic (game), 3 Noto Sans, 4 Inconsolata.</summary>
+        public IFontHandle? Get(float wanted, int fontFamily = 0)
         {
             wanted = MathF.Round(wanted);
-            if (handle is null || Math.Abs(wanted - size) > 0.5f)
+            if (handle is null || Math.Abs(wanted - size) > 0.5f || fontFamily != family)
             {
                 handle?.Dispose();
                 size = wanted;
+                family = fontFamily;
                 try
                 {
-                    handle = Plugin.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(
-                        new GameFontStyle(GameFontFamily.Axis, wanted));
+                    var atlas = Plugin.PluginInterface.UiBuilder.FontAtlas;
+                    var pixels = wanted;
+                    handle = fontFamily switch
+                    {
+                        1 => atlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.Jupiter, wanted)),
+                        2 => atlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.TrumpGothic, wanted * 1.15f)),
+                        3 => atlas.NewDelegateFontHandle(e => e.OnPreBuild(tk => tk.AddDalamudAssetFont(
+                            DalamudAsset.NotoSansCjkMedium,
+                            new SafeFontConfig { SizePx = pixels * 1.05f, GlyphRanges = NameGlyphs }))),
+                        4 => atlas.NewDelegateFontHandle(e => e.OnPreBuild(tk => tk.AddDalamudAssetFont(
+                            DalamudAsset.InconsolataRegular,
+                            new SafeFontConfig { SizePx = pixels * 1.1f, GlyphRanges = NameGlyphs }))),
+                        _ => atlas.NewGameFontHandle(new GameFontStyle(GameFontFamily.Axis, wanted)),
+                    };
                 }
                 catch (Exception)
                 {

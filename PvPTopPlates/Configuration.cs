@@ -144,6 +144,18 @@ public sealed class Configuration : IPluginConfiguration
     public Vector4 AllianceNameColor { get; set; } = new(1f, 1f, 1f, 1f);
     public Vector4 FriendlyNameColor { get; set; } = new(1f, 1f, 1f, 1f);
     public Vector4 MyNameColor { get; set; } = new(1f, 1f, 1f, 1f);
+
+    /// <summary>Name font: 0 Axis, 1 Jupiter, 2 Trump Gothic (game fonts), 3 Noto Sans, 4 Inconsolata.</summary>
+    public int NameFont { get; set; }
+
+    /// <summary>Outline around plate texts (names, HP, timers) instead of the drop shadow, coloured per group.</summary>
+    public bool TextOutline { get; set; }
+    public float TextOutlineThickness { get; set; } = 1f;
+    public Vector4 EnemyOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public Vector4 PartyOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public Vector4 AllianceOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public Vector4 FriendlyOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
+    public Vector4 MyOutlineColor { get; set; } = new(0f, 0f, 0f, 1f);
     public Vector4 TargetOutlineColor { get; set; } = new(1f, 0.82f, 0.24f, 1f);
 
     public void Save()
@@ -356,6 +368,14 @@ public sealed class Configuration : IPluginConfiguration
         AllianceNameColor = defaults.AllianceNameColor;
         FriendlyNameColor = defaults.FriendlyNameColor;
         MyNameColor = defaults.MyNameColor;
+        NameFont = defaults.NameFont;
+        TextOutline = defaults.TextOutline;
+        TextOutlineThickness = defaults.TextOutlineThickness;
+        EnemyOutlineColor = defaults.EnemyOutlineColor;
+        PartyOutlineColor = defaults.PartyOutlineColor;
+        AllianceOutlineColor = defaults.AllianceOutlineColor;
+        FriendlyOutlineColor = defaults.FriendlyOutlineColor;
+        MyOutlineColor = defaults.MyOutlineColor;
         TargetOutlineColor = defaults.TargetOutlineColor;
     }
 }

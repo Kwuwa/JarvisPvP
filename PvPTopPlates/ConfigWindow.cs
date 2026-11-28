@@ -27,6 +27,7 @@ namespace PvPTopPlates;
 internal sealed class ConfigWindow : Window, IDisposable
 {
     private const string BoostyUrl = "https://boosty.to/aloyb";
+    private const string HipolinkUrl = "https://hipolink.net/kwuwa";
     private const string GitHubUrl = "https://github.com/Kwuwa/JarvisPvP";
     private const string NewIssueUrl = GitHubUrl + "/issues/new?title=%5BBug%5D%20";
     private const ImGuiWindowFlags BaseFlags =
@@ -42,6 +43,7 @@ internal sealed class ConfigWindow : Window, IDisposable
         ("tab_debuffs", FontAwesomeIcon.Skull),
         ("tab_targeting", FontAwesomeIcon.Crosshairs),
         ("tab_appearance", FontAwesomeIcon.Palette),
+        ("tab_changelog", FontAwesomeIcon.History),
         ("tab_diagnostics", FontAwesomeIcon.Bug),
         ("tab_about", FontAwesomeIcon.InfoCircle),
     };
@@ -488,6 +490,9 @@ internal sealed class ConfigWindow : Window, IDisposable
                 DrawAppearancePage(s);
                 break;
             case 8:
+                DrawChangelogPage();
+                break;
+            case 9:
                 DrawDiagnosticsPage(s);
                 break;
             default:
@@ -540,7 +545,7 @@ internal sealed class ConfigWindow : Window, IDisposable
         if (configuration.HighlightCurrentTarget)
         {
             ImGui.SameLine();
-            Swatch("target.outline", configuration.TargetOutlineColor, v => configuration.TargetOutlineColor = v);
+            Swatch("target.outline", configuration.TargetOutlineColor, v => configuration.TargetOutlineColor = v, Defaults.TargetOutlineColor);
         }
 
         Reset("general",
@@ -631,7 +636,7 @@ internal sealed class ConfigWindow : Window, IDisposable
         Slider("bar_width", configuration.BarWidth, 40f, 240f, "%.0f px", v => configuration.BarWidth = v);
         Slider("border_thickness", configuration.BorderThickness, 0f, 6f, "%.1f px", v => configuration.BorderThickness = v);
         Slider("corner_rounding", configuration.CornerRounding, 0f, 12f, "%.1f px", v => configuration.CornerRounding = v);
-        Color("border", "border", configuration.BorderColor, v => configuration.BorderColor = v);
+        Color("border", "border", configuration.BorderColor, v => configuration.BorderColor = v, Defaults.BorderColor);
         Reset("shape",
             nameof(Configuration.BarWidth), nameof(Configuration.BorderThickness), nameof(Configuration.CornerRounding),
             nameof(Configuration.BorderColor));
@@ -643,18 +648,18 @@ internal sealed class ConfigWindow : Window, IDisposable
         {
             Slider("hp_bar_height", configuration.BarHeight, 4f, 40f, "%.0f px", v => configuration.BarHeight = v);
             ColorRow(
-                ("hp.enemy", "c_enemy", configuration.EnemyColor, v => configuration.EnemyColor = v),
-                ("hp.party", "c_party", configuration.PartyColor, v => configuration.PartyColor = v),
-                ("hp.alliance", "c_alliance", configuration.AllianceColor, v => configuration.AllianceColor = v));
+                ("hp.enemy", "c_enemy", configuration.EnemyColor, v => configuration.EnemyColor = v, Defaults.EnemyColor),
+                ("hp.party", "c_party", configuration.PartyColor, v => configuration.PartyColor = v, Defaults.PartyColor),
+                ("hp.alliance", "c_alliance", configuration.AllianceColor, v => configuration.AllianceColor = v, Defaults.AllianceColor));
             ColorRow(
-                ("hp.friendly", "c_friendly", configuration.FriendlyColor, v => configuration.FriendlyColor = v),
-                ("hp.myself", "c_myself", configuration.LocalPlayerColor, v => configuration.LocalPlayerColor = v),
-                ("hp.empty", "c_empty", configuration.EmptyHealthColor, v => configuration.EmptyHealthColor = v));
+                ("hp.friendly", "c_friendly", configuration.FriendlyColor, v => configuration.FriendlyColor = v, Defaults.FriendlyColor),
+                ("hp.myself", "c_myself", configuration.LocalPlayerColor, v => configuration.LocalPlayerColor = v, Defaults.LocalPlayerColor),
+                ("hp.empty", "c_empty", configuration.EmptyHealthColor, v => configuration.EmptyHealthColor = v, Defaults.EmptyHealthColor));
             Check("barrier", configuration.ShowShields, v => configuration.ShowShields = v);
             if (configuration.ShowShields)
             {
                 ImGui.SameLine();
-                Swatch("barrier.colour", configuration.ShieldColor, v => configuration.ShieldColor = v);
+                Swatch("barrier.colour", configuration.ShieldColor, v => configuration.ShieldColor = v, Defaults.ShieldColor);
             }
 
             Help("barrier_help");
@@ -674,8 +679,8 @@ internal sealed class ConfigWindow : Window, IDisposable
             Slider("mp_bar_height", configuration.MpBarHeight, 2f, 20f, "%.0f px", v => configuration.MpBarHeight = v);
             Slider("mp_bar_spacing", configuration.MpBarSpacing, 0f, 12f, "%.0f px", v => configuration.MpBarSpacing = v);
             ColorRow(
-                ("mp.fill", "mp_colour", configuration.MpColor, v => configuration.MpColor = v),
-                ("mp.empty", "c_empty", configuration.EmptyMpColor, v => configuration.EmptyMpColor = v));
+                ("mp.fill", "mp_colour", configuration.MpColor, v => configuration.MpColor = v, Defaults.MpColor),
+                ("mp.empty", "c_empty", configuration.EmptyMpColor, v => configuration.EmptyMpColor = v, Defaults.EmptyMpColor));
         }
 
         Reset("mp",
@@ -692,11 +697,11 @@ internal sealed class ConfigWindow : Window, IDisposable
             Slider("lb_bar_spacing", configuration.LimitBreakBarSpacing, 0f, 12f, "%.0f px", v => configuration.LimitBreakBarSpacing = v);
             Slider("lb_blink", configuration.LimitBreakBlinkSpeed, 0.2f, 5f, "%.1f " + Unit("per_second"), v => configuration.LimitBreakBlinkSpeed = v);
             ColorRow(
-                ("lb.charge", "c_charge", configuration.LimitBreakColor, v => configuration.LimitBreakColor = v),
-                ("lb.empty", "c_empty", configuration.LimitBreakEmptyColor, v => configuration.LimitBreakEmptyColor = v));
+                ("lb.charge", "c_charge", configuration.LimitBreakColor, v => configuration.LimitBreakColor = v, Defaults.LimitBreakColor),
+                ("lb.empty", "c_empty", configuration.LimitBreakEmptyColor, v => configuration.LimitBreakEmptyColor = v, Defaults.LimitBreakEmptyColor));
             ColorRow(
-                ("lb.full1", "c_full1", configuration.LimitBreakFullColorA, v => configuration.LimitBreakFullColorA = v),
-                ("lb.full2", "c_full2", configuration.LimitBreakFullColorB, v => configuration.LimitBreakFullColorB = v));
+                ("lb.full1", "c_full1", configuration.LimitBreakFullColorA, v => configuration.LimitBreakFullColorA = v, Defaults.LimitBreakFullColorA),
+                ("lb.full2", "c_full2", configuration.LimitBreakFullColorB, v => configuration.LimitBreakFullColorB = v, Defaults.LimitBreakFullColorB));
         }
 
         Reset("lb",
@@ -715,13 +720,21 @@ internal sealed class ConfigWindow : Window, IDisposable
         {
             Indented(() =>
             {
+                var game = T("font_game");
+                Combo(
+                    "name_font",
+                    configuration.NameFont,
+                    new[] { $"Axis ({game})", $"Jupiter ({game})", $"Trump Gothic ({game})", "Noto Sans", "Inconsolata" },
+                    v => configuration.NameFont = v);
                 Slider("name_size", configuration.NameFontScale, 0.5f, 2.5f, "%.2fx", v => configuration.NameFontScale = v);
                 ImGui.TextDisabled(T("name_colours"));
-                Color("name.enemy", "c_enemy", configuration.EnemyNameColor, v => configuration.EnemyNameColor = v);
-                Color("name.party", "c_party", configuration.PartyNameColor, v => configuration.PartyNameColor = v);
-                Color("name.alliance", "c_alliance", configuration.AllianceNameColor, v => configuration.AllianceNameColor = v);
-                Color("name.friendly", "c_friendly", configuration.FriendlyNameColor, v => configuration.FriendlyNameColor = v);
-                Color("name.myself", "c_myself", configuration.MyNameColor, v => configuration.MyNameColor = v);
+                ColorRow(
+                    ("name.enemy", "c_enemy", configuration.EnemyNameColor, v => configuration.EnemyNameColor = v, Defaults.EnemyNameColor),
+                    ("name.party", "c_party", configuration.PartyNameColor, v => configuration.PartyNameColor = v, Defaults.PartyNameColor),
+                    ("name.alliance", "c_alliance", configuration.AllianceNameColor, v => configuration.AllianceNameColor = v, Defaults.AllianceNameColor));
+                ColorRow(
+                    ("name.friendly", "c_friendly", configuration.FriendlyNameColor, v => configuration.FriendlyNameColor = v, Defaults.FriendlyNameColor),
+                    ("name.myself", "c_myself", configuration.MyNameColor, v => configuration.MyNameColor = v, Defaults.MyNameColor));
             });
         }
 
@@ -740,12 +753,34 @@ internal sealed class ConfigWindow : Window, IDisposable
             });
         }
 
-        Color("text_colour", "text_colour", configuration.TextColor, v => configuration.TextColor = v);
+        Color("text_colour", "text_colour", configuration.TextColor, v => configuration.TextColor = v, Defaults.TextColor);
+
+        Check("text_outline", configuration.TextOutline, v => configuration.TextOutline = v);
+        Help("text_outline_help");
+        if (configuration.TextOutline)
+        {
+            Indented(() =>
+            {
+                Slider("outline_thickness", configuration.TextOutlineThickness, 1f, 4f, "%.0f px", v => configuration.TextOutlineThickness = v);
+                ImGui.TextDisabled(T("outline_colours"));
+                ColorRow(
+                    ("outline.enemy", "c_enemy", configuration.EnemyOutlineColor, v => configuration.EnemyOutlineColor = v, Defaults.EnemyOutlineColor),
+                    ("outline.party", "c_party", configuration.PartyOutlineColor, v => configuration.PartyOutlineColor = v, Defaults.PartyOutlineColor),
+                    ("outline.alliance", "c_alliance", configuration.AllianceOutlineColor, v => configuration.AllianceOutlineColor = v, Defaults.AllianceOutlineColor));
+                ColorRow(
+                    ("outline.friendly", "c_friendly", configuration.FriendlyOutlineColor, v => configuration.FriendlyOutlineColor = v, Defaults.FriendlyOutlineColor),
+                    ("outline.myself", "c_myself", configuration.MyOutlineColor, v => configuration.MyOutlineColor = v, Defaults.MyOutlineColor));
+            });
+        }
+
         Reset("text",
             nameof(Configuration.ShowNames), nameof(Configuration.NameFontScale), nameof(Configuration.ShowHpPercent),
             nameof(Configuration.HpTextFormat), nameof(Configuration.HpTextFontScale), nameof(Configuration.TextColor),
             nameof(Configuration.EnemyNameColor), nameof(Configuration.PartyNameColor), nameof(Configuration.AllianceNameColor),
-            nameof(Configuration.FriendlyNameColor), nameof(Configuration.MyNameColor));
+            nameof(Configuration.FriendlyNameColor), nameof(Configuration.MyNameColor), nameof(Configuration.NameFont),
+            nameof(Configuration.TextOutline), nameof(Configuration.TextOutlineThickness),
+            nameof(Configuration.EnemyOutlineColor), nameof(Configuration.PartyOutlineColor), nameof(Configuration.AllianceOutlineColor),
+            nameof(Configuration.FriendlyOutlineColor), nameof(Configuration.MyOutlineColor));
         EndCard();
     }
 
@@ -768,7 +803,7 @@ internal sealed class ConfigWindow : Window, IDisposable
             if (configuration.ShowElixirCast)
             {
                 ImGui.SameLine();
-                Swatch("elixir.colour", configuration.ElixirFillColor, v => configuration.ElixirFillColor = v);
+                Swatch("elixir.colour", configuration.ElixirFillColor, v => configuration.ElixirFillColor = v, Defaults.ElixirFillColor);
             }
 
             Help("elixir_fill_help");
@@ -805,9 +840,9 @@ internal sealed class ConfigWindow : Window, IDisposable
             Slider("x_offset", configuration.GuardIconOffsetX, -80f, 80f, "%.0f px", v => configuration.GuardIconOffsetX = v, "guard.x");
             Slider("y_offset", configuration.GuardIconOffsetY, -80f, 80f, "%.0f px", v => configuration.GuardIconOffsetY = v, "guard.y");
             ColorRow(
-                ("guard.ready", "c_ready", configuration.GuardReadyColor, v => configuration.GuardReadyColor = v),
-                ("guard.active", "c_active", configuration.GuardActiveColor, v => configuration.GuardActiveColor = v),
-                ("guard.cooldown", "c_cooldown", configuration.GuardCooldownColor, v => configuration.GuardCooldownColor = v));
+                ("guard.ready", "c_ready", configuration.GuardReadyColor, v => configuration.GuardReadyColor = v, Defaults.GuardReadyColor),
+                ("guard.active", "c_active", configuration.GuardActiveColor, v => configuration.GuardActiveColor = v, Defaults.GuardActiveColor),
+                ("guard.cooldown", "c_cooldown", configuration.GuardCooldownColor, v => configuration.GuardCooldownColor = v, Defaults.GuardCooldownColor));
         }
 
         Reset("guard",
@@ -848,7 +883,7 @@ internal sealed class ConfigWindow : Window, IDisposable
             if (configuration.HighlightMyDebuffs)
             {
                 ImGui.SameLine();
-                Swatch("debuff.mine.colour", configuration.MyDebuffBorderColor, v => configuration.MyDebuffBorderColor = v);
+                Swatch("debuff.mine.colour", configuration.MyDebuffBorderColor, v => configuration.MyDebuffBorderColor = v, Defaults.MyDebuffBorderColor);
             }
 
             Check("timers", configuration.ShowDebuffTimers, v => configuration.ShowDebuffTimers = v);
@@ -895,9 +930,9 @@ internal sealed class ConfigWindow : Window, IDisposable
                 Slider("dot_size", configuration.TargetingDotSize, 2f, 16f, "%.0f px", v => configuration.TargetingDotSize = v);
                 Slider("dot_offset", configuration.TargetingDotOffsetY, -60f, 60f, "%.0f px", v => configuration.TargetingDotOffsetY = v);
                 ColorRow(
-                    ("role.tank", "c_tank", configuration.TankColor, v => configuration.TankColor = v),
-                    ("role.healer", "c_healer", configuration.HealerColor, v => configuration.HealerColor = v),
-                    ("role.dps", "c_dps", configuration.DpsColor, v => configuration.DpsColor = v));
+                    ("role.tank", "c_tank", configuration.TankColor, v => configuration.TankColor = v, Defaults.TankColor),
+                    ("role.healer", "c_healer", configuration.HealerColor, v => configuration.HealerColor = v, Defaults.HealerColor),
+                    ("role.dps", "c_dps", configuration.DpsColor, v => configuration.DpsColor = v, Defaults.DpsColor));
             });
         }
 
@@ -917,7 +952,7 @@ internal sealed class ConfigWindow : Window, IDisposable
         Check("job_glow", configuration.TargetingMeJobGlow, v => configuration.TargetingMeJobGlow = v);
         Check("swords", configuration.TargetingMeSwords, v => configuration.TargetingMeSwords = v);
         if (configuration.TargetingMeIcons || configuration.TargetingMeJobGlow || configuration.TargetingMeSwords)
-            Color("glow_colour", "glow_colour", configuration.TargetingGlowColor, v => configuration.TargetingGlowColor = v);
+            Color("glow_colour", "glow_colour", configuration.TargetingGlowColor, v => configuration.TargetingGlowColor = v, Defaults.TargetingGlowColor);
 
         Reset("targeting",
             nameof(Configuration.TargetingMeDot), nameof(Configuration.TargetingDotSize), nameof(Configuration.TargetingDotOffsetY),
@@ -1140,6 +1175,40 @@ internal sealed class ConfigWindow : Window, IDisposable
         EndCard();
     }
 
+    /// <summary>Every version, newest first; 1.0 is the release. Texts are in Loc ("cl_" + version, one line per change).</summary>
+    private static readonly string[] ChangelogVersions = { "1.2", "1.1", "1.0" };
+
+    private void DrawChangelogPage()
+    {
+        var palette = Current;
+        var s = ImGuiHelpers.GlobalScale;
+        var installed = VersionText();
+        foreach (var version in ChangelogVersions)
+        {
+            BeginCardText(version, version == "1.0" ? FontAwesomeIcon.Flag : FontAwesomeIcon.Tag);
+            if (version == "1.0" || version == installed)
+            {
+                var badges = new List<string>();
+                if (version == "1.0")
+                    badges.Add(T("cl_release"));
+                if (version == installed)
+                    badges.Add(T("cl_installed"));
+                ImGui.TextColored(palette.Accent, string.Join(" · ", badges));
+            }
+
+            foreach (var line in T("cl_" + version.Replace('.', '_')).Split('\n'))
+            {
+                ImGui.Bullet();
+                ImGui.SameLine(0f, 10f * s);
+                ImGui.BeginGroup();
+                ImGui.TextUnformatted(line);
+                ImGui.EndGroup();
+            }
+
+            EndCard();
+        }
+    }
+
     private void DrawAboutPage(float s)
     {
         var palette = Current;
@@ -1159,6 +1228,16 @@ internal sealed class ConfigWindow : Window, IDisposable
             Util.OpenLink(BoostyUrl);
         ImGui.PopStyleColor(4);
         HoverText(BoostyUrl);
+        ImGui.SameLine();
+        var hipolink = new Vector4(0.42f, 0.36f, 0.95f, 1f);
+        ImGui.PushStyleColor(ImGuiCol.Button, hipolink);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, hipolink with { X = 0.52f, Y = 0.46f, Z = 1f });
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, hipolink with { X = 0.36f, Y = 0.30f, Z = 0.85f });
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 1f, 1f));
+        if (ImGui.Button(L("support_hipolink", "about.hipolink")))
+            Util.OpenLink(HipolinkUrl);
+        ImGui.PopStyleColor(4);
+        HoverText(HipolinkUrl);
         ImGui.SameLine();
         if (ImGui.Button("GitHub###about.github"))
             Util.OpenLink(GitHubUrl);
@@ -1472,14 +1551,58 @@ internal sealed class ConfigWindow : Window, IDisposable
         Check(keyB, valueB, applyB, $"{group}.{keyB}");
     }
 
+    /// <summary>
+    /// A slider with a number field and - / + buttons (one step of the shown precision: 1, 0.1 or 0.05), like the
+    /// sliders of Customize+ / Glamourer. Typed numbers apply when the field is left or Enter is pressed.
+    /// </summary>
     private void Slider(string key, float value, float minimum, float maximum, string format, Action<float> apply, string? id = null)
     {
-        ImGui.SetNextItemWidth(240f * ImGuiHelpers.GlobalScale);
-        if (ImGui.SliderFloat(L(key, id ?? key), ref value, minimum, maximum, format))
+        var s = ImGuiHelpers.GlobalScale;
+        var spacing = ImGui.GetStyle().ItemInnerSpacing.X;
+        var decimals = SliderDecimals(format);
+        var step = decimals switch { 0 => 1f, 1 => 0.1f, _ => 0.05f };
+        var number = $"%.{decimals}f";
+
+        void Set(float next)
         {
-            apply(value);
+            next = MathF.Round(next, Math.Max(decimals, 2));
+            next = Math.Clamp(next, minimum, maximum);
+            if (Math.Abs(next - value) < 0.0001f)
+                return;
+            apply(next);
             changed = true;
         }
+
+        ImGui.PushID($"slider.{id ?? key}");
+        var sliderValue = value;
+        ImGui.SetNextItemWidth(170f * s);
+        if (ImGui.SliderFloat("##slider", ref sliderValue, minimum, maximum, format))
+            Set(sliderValue);
+
+        ImGui.SameLine(0f, spacing);
+        var typed = value;
+        ImGui.SetNextItemWidth(62f * s);
+        ImGui.InputFloat("##value", ref typed, 0f, 0f, number);
+        if (ImGui.IsItemDeactivatedAfterEdit())
+            Set(typed);
+
+        var button = new Vector2(ImGui.GetFrameHeight());
+        ImGui.SameLine(0f, spacing);
+        if (ImGui.Button("-", button))
+            Set(value - step);
+        ImGui.SameLine(0f, spacing);
+        if (ImGui.Button("+", button))
+            Set(value + step);
+        ImGui.PopID();
+
+        ImGui.SameLine(0f, spacing);
+        ImGui.TextUnformatted(T(key));
+    }
+
+    private static int SliderDecimals(string format)
+    {
+        var match = System.Text.RegularExpressions.Regex.Match(format, @"%\.(\d)f");
+        return match.Success ? match.Groups[1].Value[0] - '0' : 0;
     }
 
     /// <summary>A drop-down list; Ctrl + mouse wheel over it steps through the entries.</summary>
@@ -1487,7 +1610,15 @@ internal sealed class ConfigWindow : Window, IDisposable
     {
         var current = Math.Clamp(value, 0, items.Length - 1);
         ImGui.SetNextItemWidth(280f * ImGuiHelpers.GlobalScale);
-        if (ImGui.Combo(L(key, id ?? key), ref current, string.Join("\0", items) + "\0"))
+
+        // the chosen entry stands out in the open list (the themes' header colour is too faint for it)
+        var accent = Current.Accent;
+        ImGui.PushStyleColor(ImGuiCol.Header, accent with { W = 0.45f });
+        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, accent with { W = 0.30f });
+        ImGui.PushStyleColor(ImGuiCol.HeaderActive, accent with { W = 0.55f });
+        var picked = ImGui.Combo(L(key, id ?? key), ref current, string.Join("\0", items) + "\0");
+        ImGui.PopStyleColor(3);
+        if (picked)
         {
             apply(current);
             changed = true;
@@ -1506,37 +1637,53 @@ internal sealed class ConfigWindow : Window, IDisposable
         }
     }
 
-    private void Color(string id, string key, Vector4 color, Action<Vector4> apply)
+    private static readonly Configuration Defaults = new();
+
+    private const ImGuiColorEditFlags ColorFlags =
+        ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs |
+        ImGuiColorEditFlags.NoOptions | ImGuiColorEditFlags.NoTooltip;
+
+    /// <summary>A colour picker; right-click puts the colour back to its default.</summary>
+    private void Color(string id, string key, Vector4 color, Action<Vector4> apply, Vector4 fallback)
     {
-        if (ImGui.ColorEdit4(
-                L(key, id),
-                ref color,
-                ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs))
+        if (ImGui.ColorEdit4(L(key, id), ref color, ColorFlags))
         {
             apply(color);
             changed = true;
         }
+
+        ColorReset(fallback, apply);
     }
 
-    private void Swatch(string id, Vector4 color, Action<Vector4> apply)
+    private void Swatch(string id, Vector4 color, Action<Vector4> apply, Vector4 fallback)
     {
-        if (ImGui.ColorEdit4(
-                $"###{id}",
-                ref color,
-                ImGuiColorEditFlags.AlphaBar | ImGuiColorEditFlags.AlphaPreviewHalf | ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel))
+        if (ImGui.ColorEdit4($"###{id}", ref color, ColorFlags | ImGuiColorEditFlags.NoLabel))
         {
             apply(color);
             changed = true;
         }
+
+        ColorReset(fallback, apply);
     }
 
-    private void ColorRow(params (string Id, string Key, Vector4 Color, Action<Vector4> Apply)[] colors)
+    private void ColorReset(Vector4 fallback, Action<Vector4> apply)
+    {
+        if (ImGui.IsItemHovered())
+            Tooltip(T("colour_reset_help"));
+        if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+        {
+            apply(fallback);
+            changed = true;
+        }
+    }
+
+    private void ColorRow(params (string Id, string Key, Vector4 Color, Action<Vector4> Apply, Vector4 Fallback)[] colors)
     {
         for (var i = 0; i < colors.Length; i++)
         {
             if (i > 0)
                 ImGui.SameLine(0f, 16f * ImGuiHelpers.GlobalScale);
-            Color(colors[i].Id, colors[i].Key, colors[i].Color, colors[i].Apply);
+            Color(colors[i].Id, colors[i].Key, colors[i].Color, colors[i].Apply, colors[i].Fallback);
         }
     }
 

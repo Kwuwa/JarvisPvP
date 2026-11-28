@@ -37,6 +37,7 @@ internal static class SettingsCode
         [nameof(Configuration.DebuffPosition)] = 4,
         [nameof(Configuration.AllyDebuffPosition)] = 4,
         [nameof(Configuration.OwnDebuffPosition)] = 4,
+        [nameof(Configuration.NameFont)] = 4,
     };
 
     private static readonly PropertyInfo[] Shared = typeof(Configuration)
