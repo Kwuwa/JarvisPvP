@@ -3,8 +3,8 @@
     "Author": "Kwuwa (based on PvP TopPlates by Petra105)",
     "Name": "Jarvis PvP",
     "InternalName": "JarvisPvP",
-    "AssemblyVersion": "1.0.0.0",
-    "Description": "Draws clear plates for players in PvP above the 3D world: HP with barrier, MP and Limit Break bars, job icon, Guard with its recast, debuffs, sign markers and the enemies that have you as their target. Settings window with a live preview, four themes, diagnostics and English / French / German / Japanese texts.\n\nUse /jpvp to open the settings. Based on PvP TopPlates by Petra105 (MIT licence).",
+    "AssemblyVersion": "1.1.0.0",
+    "Description": "Draws clear plates for players in PvP above the 3D world: HP with barrier, MP and Limit Break bars, job icon, debuffs, sign markers and the enemies that have you as their target. Settings window with a live preview, four themes, diagnostics, shareable settings codes and English / French / German / Japanese / Russian texts.\n\nUse /jpvp to open the settings. Based on PvP TopPlates by Petra105 (MIT licence).",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/Kwuwa/JarvisPvP",
     "Tags": [
@@ -13,7 +13,6 @@
       "nameplates",
       "health bars",
       "mana bars",
-      "guard",
       "limit break"
     ],
     "DalamudApiLevel": 15,
@@ -22,13 +21,13 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/images/icon.png",
-    "Punchline": "Clear PvP plates: HP, MP, Limit Break, Guard, debuffs, signs and who targets you.",
-    "Changelog": "1.0: first public release as Jarvis PvP. Settings window with sidebar pages, a live preview of you, your target and an ally, four themes, Test in world, Diagnostics with Copy report and Report a problem. Debuffs on enemies, allies and yourself, each with its own position. Plates stay above the game's UI and only hide behind plugin windows.",
+    "Punchline": "Clear PvP plates: HP, MP, Limit Break, debuffs, signs and who targets you.",
+    "Changelog": "1.1: Russian interface (game terms stay in English). Share your settings: copy a settings code and send it to friends, import a code from the clipboard, undo an import. Name colour for each group (enemies, party, alliance, other friendly players, yourself).\n\n1.0: first public release as Jarvis PvP.",
     "AcceptsFeedback": true,
     "IsHide": false,
     "IsTestingExclusive": false,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/latest.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/latest.zip",
-    "LastUpdate": 1795657575
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/JarvisPvP-1.1.0.0.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/Kwuwa/JarvisPvP/main/dist/JarvisPvP-1.1.0.0.zip",
+    "LastUpdate": 1795832059
   }
 ]

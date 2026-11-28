@@ -8,6 +8,7 @@ using System.Text.Json;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.GameFonts;
+using Dalamud;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
@@ -49,6 +50,11 @@ internal sealed class ConfigWindow : Window, IDisposable
     private readonly OverlayRenderer renderer;
     private readonly IFontHandle titleFont;
     private readonly IFontHandle valueFont;
+    private readonly IFontHandle windowFont;
+    private readonly IFontHandle russianTitleFont;
+    private readonly IFontHandle russianValueFont;
+    private IDisposable? pushedWindowFont;
+    private Configuration? beforeImport;
     private readonly HashSet<long> selectedLines = new();
     private ImFontPtr iconFont;
     private bool hasIconFont;
@@ -64,6 +70,7 @@ internal sealed class ConfigWindow : Window, IDisposable
     private long lastLogId;
     private string toast = string.Empty;
     private string toastPlace = string.Empty;
+    private bool toastBad;
     private long toastUntil;
     private long resetArmedUntil;
     private float pairColumn;
@@ -91,6 +98,23 @@ internal sealed class ConfigWindow : Window, IDisposable
         valueFont = Plugin.PluginInterface.UiBuilder.FontAtlas.NewGameFontHandle(
             new GameFontStyle(GameFontFamilyAndSize.Axis18));
 
+        // The game fonts have no Cyrillic: the window uses Dalamud's default font with Cyrillic merged in from the
+        // bundled Noto Sans CJK, and the Russian header / tile values use Noto at the game fonts' sizes.
+        windowFont = Plugin.PluginInterface.UiBuilder.FontAtlas.NewDelegateFontHandle(e => e.OnPreBuild(tk =>
+        {
+            var font = tk.AddDalamudDefaultFont(-1, null);
+            var size = Plugin.PluginInterface.UiBuilder.DefaultFontSpec.SizePx;
+            tk.AddDalamudAssetFont(DalamudAsset.NotoSansCjkMedium, new SafeFontConfig
+            {
+                SizePx = size,
+                GlyphRanges = CyrillicRanges,
+                MergeFont = font,
+            });
+            tk.AttachExtraGlyphsForDalamudLanguage(new SafeFontConfig { SizePx = size, MergeFont = font });
+        }));
+        russianTitleFont = NotoFont(22f);
+        russianValueFont = NotoFont(17f);
+
         // Collapse / expand as a title bar button next to the window-options button and the close X, so all three
         // sit together in the top right corner. ImGui's own arrow is hidden (WindowMenuButtonPosition None while this
         // window begins); NoCollapse cannot be used, it keeps ImGui windows expanded.
@@ -111,11 +135,25 @@ internal sealed class ConfigWindow : Window, IDisposable
         TitleBarButtons.Add(collapseButton);
     }
 
+    private static readonly ushort[] CyrillicRanges = { 0x0400, 0x052F, 0x2010, 0x205E, 0 };
+    private static readonly ushort[] LatinCyrillicRanges = { 0x0020, 0x00FF, 0x0400, 0x052F, 0x2010, 0x205E, 0 };
+
+    private static IFontHandle NotoFont(float sizePx)
+    {
+        return Plugin.PluginInterface.UiBuilder.FontAtlas.NewDelegateFontHandle(e => e.OnPreBuild(tk =>
+            tk.AddDalamudAssetFont(DalamudAsset.NotoSansCjkMedium, new SafeFontConfig { SizePx = sizePx, GlyphRanges = LatinCyrillicRanges })));
+    }
+
+    private static bool RussianUi => Loc.Index == 4;
+
     public void Dispose()
     {
         SaveIfPending();
         titleFont.Dispose();
         valueFont.Dispose();
+        windowFont.Dispose();
+        russianTitleFont.Dispose();
+        russianValueFont.Dispose();
     }
 
     public override void PreDraw()
@@ -123,6 +161,7 @@ internal sealed class ConfigWindow : Window, IDisposable
         WindowName = $"{T("window_title")}###JarvisPvPSettings";
         collapseButton.Icon = lastContentFrame < ImGui.GetFrameCount() - 1 ? FontAwesomeIcon.ChevronDown : FontAwesomeIcon.ChevronUp;
         Push(configuration.Theme, ImGuiHelpers.GlobalScale);
+        pushedWindowFont = windowFont.Available ? windowFont.Push() : null;
         var style = ImGui.GetStyle();
         savedMenuButton = style.WindowMenuButtonPosition;
         style.WindowMenuButtonPosition = ImGuiDir.None;
@@ -134,6 +173,8 @@ internal sealed class ConfigWindow : Window, IDisposable
         if (Collapsed.HasValue && ImGui.GetFrameCount() > collapseRequestFrame)
             Collapsed = null;
         ImGui.GetStyle().WindowMenuButtonPosition = savedMenuButton;
+        pushedWindowFont?.Dispose();
+        pushedWindowFont = null;
         Pop();
     }
 
@@ -270,9 +311,10 @@ internal sealed class ConfigWindow : Window, IDisposable
         var textX = start.X + logo + (12f * s);
         var title = T("window_title");
         ImGui.SetCursorScreenPos(new Vector2(textX, start.Y));
-        if (titleFont.Available)
+        var headerFont = RussianUi ? russianTitleFont : titleFont;
+        if (headerFont.Available)
         {
-            using (titleFont.Push())
+            using (headerFont.Push())
                 ImGui.TextColored(palette.Text, title);
         }
         else
@@ -549,6 +591,8 @@ internal sealed class ConfigWindow : Window, IDisposable
             nameof(Configuration.PixelSnap));
         EndCard();
 
+        DrawShareCard();
+
         BeginCard("sec_reset", FontAwesomeIcon.Undo);
         ImGui.TextDisabled(T("reset_all_help"));
         var armed = Environment.TickCount64 < resetArmedUntil;     // a second click within 4 s confirms
@@ -668,7 +712,18 @@ internal sealed class ConfigWindow : Window, IDisposable
         BeginCard("sec_text", FontAwesomeIcon.Font);
         Check("name", configuration.ShowNames, v => configuration.ShowNames = v);
         if (configuration.ShowNames)
-            Indented(() => Slider("name_size", configuration.NameFontScale, 0.5f, 2.5f, "%.2fx", v => configuration.NameFontScale = v));
+        {
+            Indented(() =>
+            {
+                Slider("name_size", configuration.NameFontScale, 0.5f, 2.5f, "%.2fx", v => configuration.NameFontScale = v);
+                ImGui.TextDisabled(T("name_colours"));
+                Color("name.enemy", "c_enemy", configuration.EnemyNameColor, v => configuration.EnemyNameColor = v);
+                Color("name.party", "c_party", configuration.PartyNameColor, v => configuration.PartyNameColor = v);
+                Color("name.alliance", "c_alliance", configuration.AllianceNameColor, v => configuration.AllianceNameColor = v);
+                Color("name.friendly", "c_friendly", configuration.FriendlyNameColor, v => configuration.FriendlyNameColor = v);
+                Color("name.myself", "c_myself", configuration.MyNameColor, v => configuration.MyNameColor = v);
+            });
+        }
 
         Check("hp_text", configuration.ShowHpPercent, v => configuration.ShowHpPercent = v);
         Help("hp_text_help");
@@ -688,7 +743,9 @@ internal sealed class ConfigWindow : Window, IDisposable
         Color("text_colour", "text_colour", configuration.TextColor, v => configuration.TextColor = v);
         Reset("text",
             nameof(Configuration.ShowNames), nameof(Configuration.NameFontScale), nameof(Configuration.ShowHpPercent),
-            nameof(Configuration.HpTextFormat), nameof(Configuration.HpTextFontScale), nameof(Configuration.TextColor));
+            nameof(Configuration.HpTextFormat), nameof(Configuration.HpTextFontScale), nameof(Configuration.TextColor),
+            nameof(Configuration.EnemyNameColor), nameof(Configuration.PartyNameColor), nameof(Configuration.AllianceNameColor),
+            nameof(Configuration.FriendlyNameColor), nameof(Configuration.MyNameColor));
         EndCard();
     }
 
@@ -1154,9 +1211,10 @@ internal sealed class ConfigWindow : Window, IDisposable
             drawList.AddRectFilled(minimum, minimum + new Vector2(3f * s, height), U32(tiles[i].Color), palette.Rounding * s, ImDrawFlags.RoundCornersLeft);
             drawList.PushClipRect(minimum, maximum, true);
             Icon(drawList, new Vector2(maximum.X - (26f * s), minimum.Y + (10f * s)), ImGui.GetFontSize() * 1.2f, U32(palette.TextDim with { W = 0.35f }), tiles[i].Icon);
-            if (valueFont.Available)
+            var tileFont = RussianUi ? russianValueFont : valueFont;
+            if (tileFont.Available)
             {
-                using (valueFont.Push())
+                using (tileFont.Push())
                     drawList.AddText(ImGui.GetFont(), ImGui.GetFontSize(), minimum + new Vector2(12f * s, 7f * s), U32(tiles[i].Color), tiles[i].Value);
             }
             else
@@ -1242,6 +1300,7 @@ internal sealed class ConfigWindow : Window, IDisposable
         ImGui.SetClipboardText(text);
         toast = T("copied");
         toastPlace = place;
+        toastBad = false;
         toastUntil = Environment.TickCount64 + 2_500;
     }
 
@@ -1257,7 +1316,59 @@ internal sealed class ConfigWindow : Window, IDisposable
         if (toastPlace != place || Environment.TickCount64 >= toastUntil)
             return;
         ImGui.SameLine();
-        ImGui.TextColored(Current.Good, toast);
+        ImGui.TextColored(toastBad ? Current.Bad : Current.Good, toast);
+    }
+
+    private void ShowToast(string key, string place, bool bad = false)
+    {
+        toast = T(key);
+        toastPlace = place;
+        toastBad = bad;
+        toastUntil = Environment.TickCount64 + 3_000;
+    }
+
+    /// <summary>Settings code export / import, so players can share their look. Undo brings the previous settings back.</summary>
+    private void DrawShareCard()
+    {
+        BeginCard("sec_share", FontAwesomeIcon.ShareAlt);
+        ImGui.TextDisabled(T("share_help"));
+        if (AccentButton(L("export_code", "share.export")))
+        {
+            ImGui.SetClipboardText(SettingsCode.Export(configuration));
+            ShowToast("copied", "share");
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button(L("import_code", "share.import")))
+        {
+            var backup = configuration.Clone();
+            if (SettingsCode.Import(ImGui.GetClipboardText(), configuration) > 0)
+            {
+                beforeImport = backup;
+                changed = true;
+                ShowToast("import_done", "share");
+            }
+            else
+            {
+                ShowToast("import_failed", "share", true);
+            }
+        }
+
+        HoverHelp("import_help");
+        if (beforeImport != null)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button(L("undo_import", "share.undo")))
+            {
+                SettingsCode.CopyShared(beforeImport, configuration);
+                beforeImport = null;
+                changed = true;
+                ShowToast("import_undone", "share");
+            }
+        }
+
+        DrawToast("share");
+        EndCard();
     }
 
     private static string VersionText()

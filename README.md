@@ -2,12 +2,12 @@
 
 <h1 align="center">Jarvis PvP</h1>
 
-<p align="center"><b>Clear plates for every player in FFXIV PvP: HP, MP, Limit Break, Guard, debuffs, signs and who has you as their target.</b><br>
+<p align="center"><b>Clear plates for every player in FFXIV PvP: HP, MP, Limit Break, debuffs, signs and who has you as their target.</b><br>
 A Dalamud plugin, based on <a href="https://github.com/Petra105/PvPTopPlates">PvP TopPlates</a> by Petra105.</p>
 
 <p align="center">
 <img src="https://img.shields.io/badge/Dalamud%20API-15-blue" alt="Dalamud API 15">
-<img src="https://img.shields.io/badge/version-1.0-gold" alt="Version 1.0">
+<img src="https://img.shields.io/badge/version-1.1-gold" alt="Version 1.1">
 <img src="https://img.shields.io/badge/licence-MIT-green" alt="MIT licence">
 <a href="https://boosty.to/aloyb"><img src="https://img.shields.io/badge/support-Boosty-f15f2c" alt="Support on Boosty"></a>
 </p>
@@ -22,14 +22,13 @@ Every player in PvP gets a plate that terrain and walls cannot hide, drawn from 
   (read from the Crystalline Conflict team lists; blinks when full).
 - **Job icon** (party list style, gold glyph or light tile) that fills up while the player drinks a
   Standard-issue Elixir.
-- **Guard**: the hotbar icon with a ready / active / recast border, a glow while active and the recast countdown,
-  for allies and enemies.
-- **Debuffs** on enemies, allies and yourself, each with its own position (under, over, right of Guard, left of the
-  job icon), with time left and an optional border around your own debuffs.
+- **Debuffs** on enemies, allies and yourself, each with its own position (under or over the plate, at its sides),
+  with time left and an optional border around your own debuffs.
 - **Signs** (attack 1-8, bind, ignore, shapes) moved above the whole plate.
 - **Enemies targeting you**: a role-colour dot under them, their job icons above your head, a red glow and crossed
   swords on their job icon.
-- **Name and HP text** in several formats, plate above the head or under the feet, follows jumps and dashes exactly.
+- **Name and HP text** in several formats, with its own name colour for enemies, party, alliance, other friendly
+  players and yourself. The plate sits above the head or under the feet and follows jumps and dashes exactly.
 
 ### The settings window (`/jpvp`)
 
@@ -38,7 +37,10 @@ Every player in PvP gets a plate that terrain and walls cannot hide, drawn from 
   sets.
 - **Test in world**: a sample enemy plate above your own character, to set everything up without a match.
 - Themes: Midnight blue, Black, Light and Crystal (classic blue Final Fantasy menu).
-- Interface in English, French, German and Japanese, with the official game terms of each language.
+- **Share your settings**: copy a settings code (it starts with `JPVP1:`), send it to a friend, and they import it
+  with one click. An import can be undone. The language and theme of the window are not part of the code.
+- Interface in English, French, German and Japanese with the official game terms of each language, and in Russian
+  (game terms stay in English, as the game has no Russian client).
 
 ## Plays by the rules
 
@@ -72,7 +74,7 @@ Updates arrive through the plugin installer like for any other plugin.
 
 ## Something not working?
 
-1. Open `/jpvp` → **Diagnostics**. For problems with Guard, Elixir or targeting, turn on **Record game events**
+1. Open `/jpvp` → **Diagnostics**. For problems with the Elixir fill or targeting, turn on **Record game events**
    first and make the problem happen again.
 2. Press **Report a problem**: the report (version, settings, log) is copied and a new GitHub issue opens. Describe
    what happened and paste the report with Ctrl+V.

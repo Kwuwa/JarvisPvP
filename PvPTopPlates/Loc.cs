@@ -7,16 +7,16 @@ using LuminaAction = Lumina.Excel.Sheets.Action;
 namespace PvPTopPlates;
 
 /// <summary>
-/// Interface texts in English, French, German and Japanese.
+/// Interface texts in English, French, German and Japanese, plus Russian (LocRu.cs) with the game terms kept in English.
 /// Game terms come from the game itself so they match the official client text of the chosen language:
 /// {GUARD} / {ELIXIR} = Action 29054 / 29055 names and {HP} / {MP} = BaseParam 7 / 8, read from the game data
 /// (verified values below are the fallback); {LB}, {CC}, roles, {SIGNS}, {PVP} etc. are the official Addon texts
 /// (Limit Break = Addon 1190, roles = 2784-2786, Crystalline Conflict = 17033, Signs = 7599, PvP = 4900,
 /// debuffs = 5803 / 8013, party list = 7641), checked in all four languages.
 /// </summary>
-internal static class Loc
+internal static partial class Loc
 {
-    public static readonly string[] LanguageNames = { "Game language", "English", "Français", "Deutsch", "日本語" };
+    public static readonly string[] LanguageNames = { "Game language", "English", "Français", "Deutsch", "日本語", "Русский" };
 
     private static readonly Dictionary<string, string[]> Texts = new(StringComparer.Ordinal)
     {
@@ -267,7 +267,8 @@ internal static class Loc
         ["fmt_current_short"] = new[] { "Current (short)", "Actuels (abrégé)", "Aktuell (kurz)", "現在（短縮）" },
         ["fmt_current_max_short"] = new[] { "Current / maximum (short)", "Actuels / max. (abrégé)", "Aktuell / Maximum (kurz)", "現在／最大（短縮）" },
         ["hp_text_size"] = new[] { "{HP} text size", "Taille du texte des {HP}", "Größe des {HP}-Texts", "{HP}表示のサイズ" },
-        ["text_colour"] = new[] { "Text colour", "Couleur du texte", "Textfarbe", "文字の色" },
+        ["text_colour"] = new[] { "{HP} and timer text colour", "Couleur du texte des {HP} et des minuteurs", "Farbe von {HP}-Text und Timern", "{HP}とタイマーの文字色" },
+        ["name_colours"] = new[] { "Name colour", "Couleur du nom", "Namensfarbe", "名前の色" },
 
         // job icon
         ["sec_job"] = new[] { "Job icon", "Icône de job", "Job-Symbol", "ジョブアイコン" },
@@ -528,6 +529,29 @@ internal static class Loc
             "FINAL FANTASY XIV © SQUARE ENIX。アイコンはゲーム内のファイルから読み込んでいます。本プラグインはスクウェア・エニックスとは無関係であり、公認を受けたものでもありません。",
         },
 
+        // sharing settings
+        ["sec_share"] = new[] { "Share settings", "Partager les réglages", "Einstellungen teilen", "設定の共有" },
+        ["share_help"] = new[]
+        {
+            "Copy a settings code and send it to a friend, or paste a code someone shared with you. The code holds every plate setting; the language, theme and layout of this window are not included.",
+            "Copiez un code de réglages et envoyez-le à un ami, ou collez un code qu'on vous a partagé. Le code contient tous les réglages des barres ; la langue, le thème et la disposition de cette fenêtre n'en font pas partie.",
+            "Kopiere einen Einstellungscode und schick ihn einem Freund, oder füge einen Code ein, den jemand mit dir geteilt hat. Der Code enthält alle Einstellungen der Leisten; Sprache, Design und Layout dieses Fensters gehören nicht dazu.",
+            "設定コードをコピーして友達に送ったり、共有されたコードを貼り付けたりできます。コードにはバーの設定がすべて含まれます。このウィンドウの言語・テーマ・レイアウトは含まれません。",
+        },
+        ["export_code"] = new[] { "Copy settings code", "Copier le code des réglages", "Einstellungscode kopieren", "設定コードをコピー" },
+        ["import_code"] = new[] { "Import from clipboard", "Importer depuis le presse-papiers", "Aus Zwischenablage importieren", "クリップボードから読み込む" },
+        ["import_help"] = new[]
+        {
+            "Copy a code (it starts with JPVP1:) and press this button. Your current settings are replaced; Undo import brings them back.",
+            "Copiez un code (il commence par JPVP1:) puis appuyez sur ce bouton. Vos réglages actuels sont remplacés ; « Annuler l'import » les rétablit.",
+            "Kopiere einen Code (er beginnt mit JPVP1:) und drücke diesen Knopf. Deine aktuellen Einstellungen werden ersetzt; »Import rückgängig« stellt sie wieder her.",
+            "コード（JPVP1: で始まります）をコピーしてからこのボタンを押してください。現在の設定は置き換えられます。「読み込みを取り消す」で元に戻せます。",
+        },
+        ["undo_import"] = new[] { "Undo import", "Annuler l'import", "Import rückgängig", "読み込みを取り消す" },
+        ["import_done"] = new[] { "Settings imported.", "Réglages importés.", "Einstellungen importiert.", "設定を読み込みました。" },
+        ["import_failed"] = new[] { "No Jarvis PvP settings code in the clipboard.", "Aucun code de réglages Jarvis PvP dans le presse-papiers.", "Kein Einstellungscode von Jarvis PvP in der Zwischenablage.", "クリップボードにJarvis PvPの設定コードがありません。" },
+        ["import_undone"] = new[] { "Previous settings restored.", "Réglages précédents rétablis.", "Vorherige Einstellungen wiederhergestellt.", "前の設定に戻しました。" },
+
         // preview scene and "Test in world" plate texts
         ["preview_enemy"] = new[] { "Enemy Player", "Joueur ennemi", "Gegnerischer Spieler", "敵プレイヤー" },
         ["preview_ally"] = new[] { "Ally Player", "Joueur allié", "Verbündeter Spieler", "味方プレイヤー" },
@@ -542,11 +566,14 @@ internal static class Loc
 
     public static int Selected { get; set; }
 
-    /// <summary>0 English, 1 French, 2 German, 3 Japanese.</summary>
+    /// <summary>0 English, 1 French, 2 German, 3 Japanese, 4 Russian (not a game language: game terms stay English).</summary>
     public static int Index
     {
         get
         {
+            if (Selected == 5)
+                return 4;
+
             var language = Selected switch
             {
                 1 => ClientLanguage.English,
@@ -571,7 +598,16 @@ internal static class Loc
             return key;
 
         var index = Index;
+        if (index == 4)
+            return Fill(Russian.TryGetValue(key, out var russian) ? russian : values[0], index);
         return Fill(values[index], index);
+    }
+
+    /// <summary>Text drawn on a plate with the game font: English instead of Russian (the game font has no Cyrillic).</summary>
+    public static string PlateText(string key)
+    {
+        var index = Index;
+        return index == 4 && Texts.TryGetValue(key, out var values) ? Fill(values[0], index) : T(key);
     }
 
     /// <summary>Text with a stable ImGui id (the visible text can change with the language, the id does not).</summary>
@@ -582,7 +618,7 @@ internal static class Loc
 
     public static string Unit(string unit)
     {
-        var index = Index;
+        var index = Term(Index);
         return unit switch
         {
             "yalms" => new[] { "yalms", "yalms", "Yalm", "ヤルム" }[index],
@@ -621,6 +657,8 @@ internal static class Loc
         if (text.IndexOf('{') < 0)
             return text;
 
+        index = Term(index);
+
         return text
             .Replace("{GUARD}", ActionName(29054, index, new[] { "Guard", "Garde", "Wehr", "防御" }))
             .Replace("{ELIXIR}", ActionName(29055, index, new[] { "Standard-issue Elixir", "Élixir militaire", "Frontenelixier", "軍用エリクサー" }))
@@ -636,6 +674,9 @@ internal static class Loc
             .Replace("{HEALER}", new[] { "Healer", "Soigneur", "Heiler", "ヒーラー" }[index])
             .Replace("{DPS}", new[] { "DPS", "DPS", "Angreifer", "DPS" }[index]);
     }
+
+    /// <summary>Language of game terms: Russian keeps the English names of abilities, gauges and modes.</summary>
+    private static int Term(int index) => index is >= 0 and <= 3 ? index : 0;
 
     private static ClientLanguage ToClientLanguage(int index)
     {

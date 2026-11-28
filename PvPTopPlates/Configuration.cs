@@ -9,7 +9,7 @@ public sealed class Configuration : IPluginConfiguration
 {
     public int Version { get; set; }
 
-    /// <summary>0 = game language, 1 English, 2 French, 3 German, 4 Japanese.</summary>
+    /// <summary>0 = game language, 1 English, 2 French, 3 German, 4 Japanese, 5 Russian.</summary>
     public int UiLanguage { get; set; }
 
     /// <summary>Settings window theme: 0 Midnight blue, 1 Black, 2 Light, 3 Crystal (Final Fantasy).</summary>
@@ -137,6 +137,13 @@ public sealed class Configuration : IPluginConfiguration
     public Vector4 BorderColor { get; set; } = new(0.01f, 0.01f, 0.015f, 0.98f);
     public Vector4 ShieldColor { get; set; } = new(1f, 0.82f, 0.30f, 0.95f);
     public Vector4 TextColor { get; set; } = new(1f, 1f, 1f, 1f);
+
+    /// <summary>Name colours per player group (since config version 5; TextColor is the {HP} / timer text).</summary>
+    public Vector4 EnemyNameColor { get; set; } = new(1f, 1f, 1f, 1f);
+    public Vector4 PartyNameColor { get; set; } = new(1f, 1f, 1f, 1f);
+    public Vector4 AllianceNameColor { get; set; } = new(1f, 1f, 1f, 1f);
+    public Vector4 FriendlyNameColor { get; set; } = new(1f, 1f, 1f, 1f);
+    public Vector4 MyNameColor { get; set; } = new(1f, 1f, 1f, 1f);
     public Vector4 TargetOutlineColor { get; set; } = new(1f, 0.82f, 0.24f, 1f);
 
     public void Save()
@@ -202,6 +209,21 @@ public sealed class Configuration : IPluginConfiguration
             FollowHorizontal = 60f;
 
         Version = 4;
+        return true;
+    }
+
+    /// <summary>Version 5: names got their own colour per group, starting from the old shared text colour.</summary>
+    public bool Migrate5()
+    {
+        if (Version >= 5)
+            return false;
+
+        EnemyNameColor = TextColor;
+        PartyNameColor = TextColor;
+        AllianceNameColor = TextColor;
+        FriendlyNameColor = TextColor;
+        MyNameColor = TextColor;
+        Version = 5;
         return true;
     }
 
@@ -329,6 +351,11 @@ public sealed class Configuration : IPluginConfiguration
         BorderColor = defaults.BorderColor;
         ShieldColor = defaults.ShieldColor;
         TextColor = defaults.TextColor;
+        EnemyNameColor = defaults.EnemyNameColor;
+        PartyNameColor = defaults.PartyNameColor;
+        AllianceNameColor = defaults.AllianceNameColor;
+        FriendlyNameColor = defaults.FriendlyNameColor;
+        MyNameColor = defaults.MyNameColor;
         TargetOutlineColor = defaults.TargetOutlineColor;
     }
 }

@@ -524,7 +524,7 @@ internal sealed class OverlayRenderer : IDisposable
         var local = Plugin.ObjectTable.LocalPlayer;
         var youName = local?.Name.TextValue;
         if (string.IsNullOrEmpty(youName))
-            youName = Loc.T("pv_you");
+            youName = Loc.PlateText("pv_you");
         var youJob = local?.ClassJob.RowId ?? 31u;
         if (youJob == 0)
             youJob = 31;
@@ -1699,6 +1699,7 @@ internal sealed class OverlayRenderer : IDisposable
                 nameFont,
                 configuration.NameFontScale * textScale,
                 candidate.Name,
+                NameColor(candidate.Relation),
                 textSize =>
                 {
                     var namePosition = new Vector2(
@@ -2600,6 +2601,27 @@ internal sealed class OverlayRenderer : IDisposable
         Func<Vector2, Vector2> place,
         float uiScale)
     {
+        DrawCrispText(drawList, font, scale, text, configuration.TextColor, place, uiScale);
+    }
+
+    private Vector4 NameColor(PlayerRelation relation) => relation switch
+    {
+        PlayerRelation.Enemy => configuration.EnemyNameColor,
+        PlayerRelation.Party => configuration.PartyNameColor,
+        PlayerRelation.Alliance => configuration.AllianceNameColor,
+        PlayerRelation.LocalPlayer => configuration.MyNameColor,
+        _ => configuration.FriendlyNameColor,
+    };
+
+    private void DrawCrispText(
+        ImDrawListPtr drawList,
+        ScaledFont font,
+        float scale,
+        string text,
+        Vector4 color,
+        Func<Vector2, Vector2> place,
+        float uiScale)
+    {
         scale = Math.Clamp(scale, 0.3f, 4f);
         IDisposable? pushed = null;
         try
@@ -2623,7 +2645,7 @@ internal sealed class OverlayRenderer : IDisposable
             var shadow = MathF.Max(1f, MathF.Round(size / BaseTextPixels)) * Math.Max(1f, uiScale);
             Grow(position, position + textSize + new Vector2(shadow));
             drawList.AddText(imFont, size, position + new Vector2(shadow), ToColor(new Vector4(0f, 0f, 0f, 0.95f)), text);
-            drawList.AddText(imFont, size, position, ToColor(configuration.TextColor), text);
+            drawList.AddText(imFont, size, position, ToColor(color), text);
         }
         finally
         {
